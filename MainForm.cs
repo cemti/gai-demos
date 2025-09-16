@@ -83,7 +83,7 @@ namespace WindowsErrorAnalyzer
                 using var engine = new TesseractEngine(Datapath, "eng", EngineMode.Default);
                 using var img = Pix.LoadFromFile(croppedPath);
                 using var page = engine.Process(img);
-                return page.GetText();
+                return page.GetText().ReplaceLineEndings().Trim();
             }
             catch (Exception ex)
             {
