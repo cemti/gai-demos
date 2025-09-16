@@ -1,5 +1,8 @@
+using OpenCvSharp;
 using System;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -32,12 +35,53 @@ namespace WindowsErrorAnalyzer
             }
         }
 
+        private static string PreprocessAndCrop(string imagePath)
+        {
+            using var src = Cv2.ImRead(imagePath, ImreadModes.Color);
+
+            // Convert to grayscale
+            using var gray = new Mat();
+            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+
+            // Apply binary threshold (makes text stand out)
+            using var thresh = new Mat();
+            Cv2.Threshold(gray, thresh, 200, 255, ThresholdTypes.BinaryInv);
+
+            // Find contours
+            Cv2.FindContours(thresh, out var contours, out _, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+            // Find the largest contour by area (likely the dialog box)
+            var largestContour = contours.OrderByDescending(x => Cv2.ContourArea(x)).FirstOrDefault();
+            if (largestContour == null || largestContour.Length == 0)
+                return imagePath; // fallback: original
+
+            var rect = Cv2.BoundingRect(largestContour);
+
+            // Add padding but exclude window frame/title/buttons
+            rect.X += 10;
+            rect.Y += 40;  // skip title bar
+            rect.Width -= 20;
+            rect.Height -= 80; // skip button area
+
+            if (rect.X < 0 || rect.Y < 0 || rect.Width <= 0 || rect.Height <= 0)
+                return imagePath;
+
+            using var roi = new Mat(src, rect);
+
+            // Save cropped result to temporary file
+            string tempFile = Path.Combine(Path.GetTempPath(), "cropped.png");
+            Cv2.ImWrite(tempFile, roi);
+            return tempFile;
+        }
+
         private static string RunOCR(string imagePath)
         {
             try
             {
+                string croppedPath = PreprocessAndCrop(imagePath);
+
                 using var engine = new TesseractEngine(Datapath, "eng", EngineMode.Default);
-                using var img = Pix.LoadFromFile(imagePath);
+                using var img = Pix.LoadFromFile(croppedPath);
                 using var page = engine.Process(img);
                 return page.GetText();
             }
@@ -47,6 +91,7 @@ namespace WindowsErrorAnalyzer
                 return "";
             }
         }
+
 
         private async void BtnSummarize_Click(object sender, EventArgs e)
         {
