@@ -29,9 +29,11 @@ namespace WindowsErrorAnalyzer
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                pictureBox.Image = Image.FromFile(ofd.FileName);
-                extractedText = RunOCR(ofd.FileName);
+                pictureBox.Image?.Dispose();
+                var (text, path) = RunOCR(ofd.FileName);
+                extractedText = text;
                 txtExtracted.Text = extractedText;
+                pictureBox.Image = Image.FromFile(path);
             }
         }
 
@@ -74,7 +76,7 @@ namespace WindowsErrorAnalyzer
             return tempFile;
         }
 
-        private static string RunOCR(string imagePath)
+        private static (string Text, string TempPath) RunOCR(string imagePath)
         {
             try
             {
@@ -83,12 +85,12 @@ namespace WindowsErrorAnalyzer
                 using var engine = new TesseractEngine(Datapath, "eng", EngineMode.Default);
                 using var img = Pix.LoadFromFile(croppedPath);
                 using var page = engine.Process(img);
-                return page.GetText().ReplaceLineEndings().Trim();
+                return (page.GetText().ReplaceLineEndings().Trim(), croppedPath);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("OCR Error: " + ex.Message);
-                return "";
+                return ("", "");
             }
         }
 
