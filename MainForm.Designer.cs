@@ -101,6 +101,7 @@ namespace WindowsErrorAnalyzer
             txtAnswer.Location = new System.Drawing.Point(12, 470);
             txtAnswer.Multiline = true;
             txtAnswer.Name = "txtAnswer";
+            txtAnswer.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             txtAnswer.Size = new System.Drawing.Size(438, 60);
             txtAnswer.TabIndex = 7;
             // 
