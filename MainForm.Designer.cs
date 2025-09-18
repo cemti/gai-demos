@@ -59,12 +59,12 @@ namespace WindowsErrorAnalyzer
             txtExtracted.Multiline = true;
             txtExtracted.Name = "txtExtracted";
             txtExtracted.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            txtExtracted.Size = new System.Drawing.Size(438, 60);
+            txtExtracted.Size = new System.Drawing.Size(438, 100);
             txtExtracted.TabIndex = 2;
             // 
             // btnSummarize
             // 
-            btnSummarize.Location = new System.Drawing.Point(12, 290);
+            btnSummarize.Location = new System.Drawing.Point(12, 326);
             btnSummarize.Name = "btnSummarize";
             btnSummarize.Size = new System.Drawing.Size(120, 30);
             btnSummarize.TabIndex = 3;
@@ -73,23 +73,23 @@ namespace WindowsErrorAnalyzer
             // 
             // txtSummary
             // 
-            txtSummary.Location = new System.Drawing.Point(12, 330);
+            txtSummary.Location = new System.Drawing.Point(12, 362);
             txtSummary.Multiline = true;
             txtSummary.Name = "txtSummary";
             txtSummary.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            txtSummary.Size = new System.Drawing.Size(438, 60);
+            txtSummary.Size = new System.Drawing.Size(438, 100);
             txtSummary.TabIndex = 4;
             // 
             // txtQuestion
             // 
-            txtQuestion.Location = new System.Drawing.Point(12, 400);
+            txtQuestion.Location = new System.Drawing.Point(12, 468);
             txtQuestion.Name = "txtQuestion";
             txtQuestion.Size = new System.Drawing.Size(438, 23);
             txtQuestion.TabIndex = 5;
             // 
             // btnAsk
             // 
-            btnAsk.Location = new System.Drawing.Point(12, 430);
+            btnAsk.Location = new System.Drawing.Point(12, 497);
             btnAsk.Name = "btnAsk";
             btnAsk.Size = new System.Drawing.Size(120, 30);
             btnAsk.TabIndex = 6;
@@ -98,16 +98,16 @@ namespace WindowsErrorAnalyzer
             // 
             // txtAnswer
             // 
-            txtAnswer.Location = new System.Drawing.Point(12, 470);
+            txtAnswer.Location = new System.Drawing.Point(12, 533);
             txtAnswer.Multiline = true;
             txtAnswer.Name = "txtAnswer";
             txtAnswer.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            txtAnswer.Size = new System.Drawing.Size(438, 60);
+            txtAnswer.Size = new System.Drawing.Size(438, 100);
             txtAnswer.TabIndex = 7;
             // 
             // MainForm
             // 
-            ClientSize = new System.Drawing.Size(470, 540);
+            ClientSize = new System.Drawing.Size(470, 643);
             Controls.Add(pictureBox);
             Controls.Add(btnLoadImage);
             Controls.Add(txtExtracted);
@@ -116,6 +116,7 @@ namespace WindowsErrorAnalyzer
             Controls.Add(txtQuestion);
             Controls.Add(btnAsk);
             Controls.Add(txtAnswer);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             Name = "MainForm";
             Text = "Windows Error Analyzer";
             ((System.ComponentModel.ISupportInitialize)pictureBox).EndInit();
