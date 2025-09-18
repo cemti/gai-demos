@@ -1,11 +1,14 @@
 using OpenCvSharp;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tesseract;
@@ -15,10 +18,31 @@ namespace WindowsErrorAnalyzer;
 public partial class MainForm : Form
 {
     private const string Datapath = @"C:\Users\Cristian\AppData\Local\Programs\Tesseract-OCR\tessdata";
+    private readonly Stopwatch _stopwatch = new();
 
     public MainForm()
     {
         InitializeComponent();
+        modelComboBox.DataSource = new[] { "llama3.1:8b", "llama3.2-vision:11b" };
+    }
+
+    private void SetBusy(bool busy)
+    {
+        UseWaitCursor = busy;
+        btnAsk.Enabled = !busy;
+        btnExplain.Enabled = !busy;
+
+        if (busy)
+        {
+            _stopwatch.Start();
+            timeElapsedLabel.Text = "";
+        }
+        else
+        {
+            _stopwatch.Stop();
+            timeElapsedLabel.Text = _stopwatch.ToString();
+            _stopwatch.Reset();
+        }
     }
 
     private void BtnLoadImage_Click(object sender, EventArgs e)
@@ -90,43 +114,70 @@ public partial class MainForm : Form
         }
     }
 
-
-    private async void BtnSummarize_Click(object sender, EventArgs e)
+    private Dictionary<string, object> GetExplainPayload()
     {
-        var extractedText = txtExtracted.Text;
-        
-        if (!string.IsNullOrWhiteSpace(extractedText))
+        string[] images = null;
+        var prompt = "Explain this Windows error message";
+
+        if (modelComboBox.Text.Contains("vision"))
         {
-            string summary = await CallLLMAsync(@$"Summarize this Windows error message:
-{extractedText}");
-            txtSummary.Text = summary.Preprocess();
+            using MemoryStream ms = new();
+            pictureBox.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+            images = [Convert.ToBase64String(ms.ToArray())];
         }
+        else
+        {
+            prompt += $":\n{txtExtracted.Text}";
+        }
+
+        Dictionary<string, object> payload = new()
+        {
+            { "model", modelComboBox.Text },
+            { "prompt", prompt },
+            { "stream", false }
+        };
+
+        if (images is not null)
+        {
+            payload.Add("images", images);
+        }
+
+        return payload;
+    }
+
+    private async void BtnExplain_Click(object sender, EventArgs e)
+    {
+        txtAnswer.Clear();
+        SetBusy(true);
+        txtExplaination.Text = await CallLLMAsync(GetExplainPayload());
+        SetBusy(false);
     }
 
     private async void BtnAsk_Click(object sender, EventArgs e)
     {
-        var extractedText = txtExtracted.Text;
-        string question = txtQuestion.Text;
+        var extracted = txtExtracted.Text;
+        var question = txtQuestion.Text;
 
-        if (!string.IsNullOrWhiteSpace(question))
+        Dictionary<string, object> payload = new()
         {
-            string answer = await CallLLMAsync(@$"Based on this error:
-{extractedText}
+            { "model", modelComboBox.Text },
+            { "prompt", @$"Based on this error message:
+{extracted}
 Answer this question:
-{question}");
-            txtAnswer.Text = answer.Preprocess();
-        }
+{question}" },
+            { "stream", false }
+        };
+
+        SetBusy(true);
+        txtAnswer.Text = await CallLLMAsync(payload);
+        SetBusy(false);
     }
 
-    private static async Task<string> CallLLMAsync(string prompt)
+    private static async Task<string> CallLLMAsync(IReadOnlyDictionary<string, object> payload)
     {
-        using var client = new HttpClient();
-
-        var payload = new
+        using HttpClient client = new()
         {
-            model = "llama3.1:8b",
-            prompt,
-            stream = false
+            Timeout = Timeout.InfiniteTimeSpan
         };
 
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -139,7 +190,12 @@ Answer this question:
 
         var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
-        return doc.RootElement.GetProperty("response").GetString();
+        return doc.RootElement.GetProperty("response").GetString().Preprocess();
+    }
+
+    private void ModelComboBox_SelectionChangeCommitted(object sender, EventArgs e)
+    {
+        txtExtracted.Enabled = !modelComboBox.Text.Contains("vision");
     }
 }
 

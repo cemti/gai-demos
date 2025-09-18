@@ -7,8 +7,7 @@ namespace WindowsErrorAnalyzer
         private System.Windows.Forms.PictureBox pictureBox;
         private System.Windows.Forms.Button btnLoadImage;
         private System.Windows.Forms.TextBox txtExtracted;
-        private System.Windows.Forms.Button btnSummarize;
-        private System.Windows.Forms.TextBox txtSummary;
+        private System.Windows.Forms.Button btnExplain;
         private System.Windows.Forms.TextBox txtQuestion;
         private System.Windows.Forms.Button btnAsk;
         private System.Windows.Forms.TextBox txtAnswer;
@@ -27,11 +26,13 @@ namespace WindowsErrorAnalyzer
             pictureBox = new System.Windows.Forms.PictureBox();
             btnLoadImage = new System.Windows.Forms.Button();
             txtExtracted = new System.Windows.Forms.TextBox();
-            btnSummarize = new System.Windows.Forms.Button();
-            txtSummary = new System.Windows.Forms.TextBox();
+            btnExplain = new System.Windows.Forms.Button();
+            txtExplaination = new System.Windows.Forms.TextBox();
             txtQuestion = new System.Windows.Forms.TextBox();
             btnAsk = new System.Windows.Forms.Button();
             txtAnswer = new System.Windows.Forms.TextBox();
+            modelComboBox = new System.Windows.Forms.ComboBox();
+            timeElapsedLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)pictureBox).BeginInit();
             SuspendLayout();
             // 
@@ -62,24 +63,24 @@ namespace WindowsErrorAnalyzer
             txtExtracted.Size = new System.Drawing.Size(438, 100);
             txtExtracted.TabIndex = 2;
             // 
-            // btnSummarize
+            // btnExplain
             // 
-            btnSummarize.Location = new System.Drawing.Point(12, 326);
-            btnSummarize.Name = "btnSummarize";
-            btnSummarize.Size = new System.Drawing.Size(120, 30);
-            btnSummarize.TabIndex = 3;
-            btnSummarize.Text = "Summarize";
-            btnSummarize.Click += BtnSummarize_Click;
+            btnExplain.Location = new System.Drawing.Point(12, 326);
+            btnExplain.Name = "btnExplain";
+            btnExplain.Size = new System.Drawing.Size(120, 30);
+            btnExplain.TabIndex = 3;
+            btnExplain.Text = "Explain";
+            btnExplain.Click += BtnExplain_Click;
             // 
-            // txtSummary
+            // txtExplaination
             // 
-            txtSummary.Location = new System.Drawing.Point(12, 362);
-            txtSummary.Multiline = true;
-            txtSummary.Name = "txtSummary";
-            txtSummary.ReadOnly = true;
-            txtSummary.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            txtSummary.Size = new System.Drawing.Size(438, 100);
-            txtSummary.TabIndex = 4;
+            txtExplaination.Location = new System.Drawing.Point(12, 362);
+            txtExplaination.Multiline = true;
+            txtExplaination.Name = "txtExplaination";
+            txtExplaination.ReadOnly = true;
+            txtExplaination.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            txtExplaination.Size = new System.Drawing.Size(438, 100);
+            txtExplaination.TabIndex = 4;
             // 
             // txtQuestion
             // 
@@ -90,6 +91,7 @@ namespace WindowsErrorAnalyzer
             // 
             // btnAsk
             // 
+            btnAsk.Enabled = false;
             btnAsk.Location = new System.Drawing.Point(12, 497);
             btnAsk.Name = "btnAsk";
             btnAsk.Size = new System.Drawing.Size(120, 30);
@@ -107,14 +109,34 @@ namespace WindowsErrorAnalyzer
             txtAnswer.Size = new System.Drawing.Size(438, 100);
             txtAnswer.TabIndex = 7;
             // 
+            // modelComboBox
+            // 
+            modelComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            modelComboBox.FormattingEnabled = true;
+            modelComboBox.Location = new System.Drawing.Point(138, 331);
+            modelComboBox.Name = "modelComboBox";
+            modelComboBox.Size = new System.Drawing.Size(121, 23);
+            modelComboBox.TabIndex = 8;
+            modelComboBox.SelectionChangeCommitted += ModelComboBox_SelectionChangeCommitted;
+            // 
+            // timeElapsedLabel
+            // 
+            timeElapsedLabel.AutoSize = true;
+            timeElapsedLabel.Location = new System.Drawing.Point(265, 334);
+            timeElapsedLabel.Name = "timeElapsedLabel";
+            timeElapsedLabel.Size = new System.Drawing.Size(0, 15);
+            timeElapsedLabel.TabIndex = 9;
+            // 
             // MainForm
             // 
             ClientSize = new System.Drawing.Size(470, 643);
+            Controls.Add(timeElapsedLabel);
+            Controls.Add(modelComboBox);
             Controls.Add(pictureBox);
             Controls.Add(btnLoadImage);
             Controls.Add(txtExtracted);
-            Controls.Add(btnSummarize);
-            Controls.Add(txtSummary);
+            Controls.Add(btnExplain);
+            Controls.Add(txtExplaination);
             Controls.Add(txtQuestion);
             Controls.Add(btnAsk);
             Controls.Add(txtAnswer);
@@ -125,5 +147,8 @@ namespace WindowsErrorAnalyzer
             ResumeLayout(false);
             PerformLayout();
         }
+        private System.Windows.Forms.ComboBox modelComboBox;
+        private System.Windows.Forms.TextBox txtExplaination;
+        private System.Windows.Forms.Label timeElapsedLabel;
     }
 }
