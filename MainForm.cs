@@ -31,7 +31,7 @@ public partial class MainForm : Form
         {
             pictureBox.Image?.Dispose();
             var (text, path) = RunOCR(ofd.FileName);
-            extractedText = text;
+            extractedText = text.Normalize();
             txtExtracted.Text = extractedText;
             pictureBox.Image = Image.FromFile(path);
         }
@@ -90,7 +90,7 @@ public partial class MainForm : Form
             using var engine = new TesseractEngine(Datapath, "eng", EngineMode.Default);
             using var img = Pix.LoadFromFile(croppedPath);
             using var page = engine.Process(img);
-            return (page.GetText().ReplaceLineEndings().Trim(), croppedPath);
+            return (page.GetText(), croppedPath);
         }
         catch (Exception ex)
         {
@@ -106,7 +106,7 @@ public partial class MainForm : Form
         {
             string summary = await CallLLMAsync(@$"Summarize this Windows error message:
 {extractedText}");
-            txtSummary.Text = summary;
+            txtSummary.Text = summary.Normalize();
         }
     }
 
@@ -120,7 +120,7 @@ public partial class MainForm : Form
 {extractedText}
 Answer this question:
 {question}");
-            txtAnswer.Text = answer;
+            txtAnswer.Text = answer.Normalize();
         }
     }
 
@@ -147,4 +147,9 @@ Answer this question:
         using var doc = JsonDocument.Parse(json);
         return doc.RootElement.GetProperty("response").GetString();
     }
+}
+
+file static class StringExtensions
+{
+    public static string Normalize(this string input) => input.ReplaceLineEndings().Trim();
 }
