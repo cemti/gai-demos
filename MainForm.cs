@@ -30,7 +30,7 @@ public partial class MainForm : Form
         {
             pictureBox.Image?.Dispose();
             var (text, path) = RunOCR(ofd.FileName);
-            txtExtracted.Text = text.Normalize();
+            txtExtracted.Text = text.Preprocess();
             pictureBox.Image = Image.FromFile(path);
         }
     }
@@ -106,7 +106,7 @@ public partial class MainForm : Form
         {
             string summary = await CallLLMAsync(@$"Summarize this Windows error message:
 {extractedText}");
-            txtSummary.Text = summary.Normalize();
+            txtSummary.Text = summary.Preprocess();
         }
     }
 
@@ -121,7 +121,7 @@ public partial class MainForm : Form
 {extractedText}
 Answer this question:
 {question}");
-            txtAnswer.Text = answer.Normalize();
+            txtAnswer.Text = answer.Preprocess();
         }
     }
 
@@ -152,5 +152,5 @@ Answer this question:
 
 file static class StringExtensions
 {
-    public static string Normalize(this string input) => input.ReplaceLineEndings().Trim();
+    public static string Preprocess(this string input) => input.ReplaceLineEndings().Trim();
 }
