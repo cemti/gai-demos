@@ -76,6 +76,7 @@ namespace WindowsErrorAnalyzer
             txtSummary.Location = new System.Drawing.Point(12, 362);
             txtSummary.Multiline = true;
             txtSummary.Name = "txtSummary";
+            txtSummary.ReadOnly = true;
             txtSummary.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             txtSummary.Size = new System.Drawing.Size(438, 100);
             txtSummary.TabIndex = 4;
@@ -101,6 +102,7 @@ namespace WindowsErrorAnalyzer
             txtAnswer.Location = new System.Drawing.Point(12, 533);
             txtAnswer.Multiline = true;
             txtAnswer.Name = "txtAnswer";
+            txtAnswer.ReadOnly = true;
             txtAnswer.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             txtAnswer.Size = new System.Drawing.Size(438, 100);
             txtAnswer.TabIndex = 7;

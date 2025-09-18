@@ -15,7 +15,6 @@ namespace WindowsErrorAnalyzer;
 public partial class MainForm : Form
 {
     private const string Datapath = @"C:\Users\Cristian\AppData\Local\Programs\Tesseract-OCR\tessdata";
-    private string extractedText = "";
 
     public MainForm()
     {
@@ -31,8 +30,7 @@ public partial class MainForm : Form
         {
             pictureBox.Image?.Dispose();
             var (text, path) = RunOCR(ofd.FileName);
-            extractedText = text.Normalize();
-            txtExtracted.Text = extractedText;
+            txtExtracted.Text = text.Normalize();
             pictureBox.Image = Image.FromFile(path);
         }
     }
@@ -102,6 +100,8 @@ public partial class MainForm : Form
 
     private async void BtnSummarize_Click(object sender, EventArgs e)
     {
+        var extractedText = txtExtracted.Text;
+        
         if (!string.IsNullOrWhiteSpace(extractedText))
         {
             string summary = await CallLLMAsync(@$"Summarize this Windows error message:
@@ -112,6 +112,7 @@ public partial class MainForm : Form
 
     private async void BtnAsk_Click(object sender, EventArgs e)
     {
+        var extractedText = txtExtracted.Text;
         string question = txtQuestion.Text;
 
         if (!string.IsNullOrWhiteSpace(question))
