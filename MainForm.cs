@@ -23,7 +23,7 @@ public partial class MainForm : Form
     public MainForm()
     {
         InitializeComponent();
-        modelComboBox.DataSource = new[] { "llama3.1:8b", "llama3.2-vision:11b" };
+        modelComboBox.DataSource = new[] { "llama3.1", "llama3.2", "llama3.2-vision" };
     }
 
     private void SetBusy(bool busy)
