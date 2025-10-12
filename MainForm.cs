@@ -23,7 +23,7 @@ public partial class MainForm : Form
     public MainForm()
     {
         InitializeComponent();
-        modelComboBox.DataSource = new[] { "llama3.1", "llama3.2", "llama3.2-vision" };
+        modelComboBox.DataSource = new[] { "granite3.2-vision", "llama3.2-vision" };
     }
 
     private void SetBusy(bool busy)
@@ -91,7 +91,7 @@ public partial class MainForm : Form
         }
 
         string tempFile = Path.Combine(Path.GetTempPath(), "cropped.png");
-        using var roi = new Mat(src, rect);        
+        using var roi = new Mat(src, rect);
         Cv2.ImWrite(tempFile, roi);
         return tempFile;
     }
