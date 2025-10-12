@@ -25,8 +25,7 @@ public partial class MainForm : Form
     private void SetBusy(bool busy)
     {
         UseWaitCursor = busy;
-        btnAsk.Enabled = !busy;
-        btnExplain.Enabled = !busy;
+        btnExecute.Enabled = !busy;
 
         if (busy)
         {
@@ -43,31 +42,21 @@ public partial class MainForm : Form
 
     private void BtnLoadImage_Click(object sender, EventArgs e)
     {
-        using OpenFileDialog ofd = new();
-        ofd.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp";
+        Bitmap bm = new(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+        using var g = Graphics.FromImage(bm);
+        g.CopyFromScreen(0, 0, 0, 0, bm.Size);
 
-        if (ofd.ShowDialog() == DialogResult.OK)
-        {
-            pictureBox.Image?.Dispose();
-            pictureBox.Image = Image.FromFile(ofd.FileName);
-        }
+        pictureBox?.Image?.Dispose();
+        pictureBox.Image = bm;
     }
 
     private Dictionary<string, object> GetExplainPayload()
     {
-        string[] images = null;
         var prompt = "Explain this Windows error message";
 
-        if (modelComboBox.Text.Contains("vision"))
-        {
-            using MemoryStream ms = new();
-            pictureBox.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-            images = [Convert.ToBase64String(ms.ToArray())];
-        }
-        else
-        {
-            prompt += $":\n{txtExtracted.Text}";
-        }
+        using MemoryStream ms = new();
+        pictureBox.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+        string[] images = [Convert.ToBase64String(ms.ToArray())];
 
         Dictionary<string, object> payload = new()
         {
@@ -84,31 +73,10 @@ public partial class MainForm : Form
         return payload;
     }
 
-    private async void BtnExplain_Click(object sender, EventArgs e)
+    private async void BtnExecute_Click(object sender, EventArgs e)
     {
-        txtAnswer.Clear();
         SetBusy(true);
-        txtExplaination.Text = await CallLLMAsync(GetExplainPayload());
-        SetBusy(false);
-    }
-
-    private async void BtnAsk_Click(object sender, EventArgs e)
-    {
-        var extracted = txtExtracted.Text;
-        var question = txtQuestion.Text;
-
-        Dictionary<string, object> payload = new()
-        {
-            { "model", modelComboBox.Text },
-            { "prompt", @$"Based on this error message:
-{extracted}
-Answer this question:
-{question}" },
-            { "stream", false }
-        };
-
-        SetBusy(true);
-        txtAnswer.Text = await CallLLMAsync(payload);
+        txtResponse.Text = await CallLLMAsync(GetExplainPayload());
         SetBusy(false);
     }
 
@@ -130,11 +98,6 @@ Answer this question:
         var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
         return doc.RootElement.GetProperty("response").GetString().Preprocess();
-    }
-
-    private void ModelComboBox_SelectionChangeCommitted(object sender, EventArgs e)
-    {
-        txtExtracted.Enabled = !modelComboBox.Text.Contains("vision");
     }
 }
 
