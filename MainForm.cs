@@ -22,6 +22,12 @@ public partial class MainForm : Form
         public override string ToString() => IsElimination ? Move[..2] + 'x' + Move[2..] : Move;
     }
 
+    private class StepTelemetry
+    {
+        public HashSet<string> InvalidMoves { get; } = [];
+        public TimeSpan TimeTaken { get; set; } = TimeSpan.Zero;
+    }
+
     private const string SystemPrompt = @"You are playing as White in a chess game.
 
 Your task is to make a move that defeats Black so that your king will not be in check.
@@ -43,7 +49,7 @@ Answer: <original file><original rank><destination file><destination rank>";
     };
 
     private readonly List<ChessMove> _moves = [];
-    private readonly List<HashSet<string>> _invalidMovesPerStep = [];
+    private readonly List<StepTelemetry> _telemetry = [];
 
     private CancellationTokenSource _cancellationTokenSource = new();
 
@@ -84,9 +90,9 @@ Answer: <original file><original rank><destination file><destination rank>";
     {
         var prompt = "Move.";
 
-        if (_invalidMovesPerStep[^1].Count > 0)
+        if (_telemetry[^1].InvalidMoves is { Count: > 0 } invalidMoves)
         {
-            prompt += $"\n\nDo not respond with one of these moves: {string.Join(", ", _moves.Where((x, i) => (i & 1) == 0).Select(x => x.Move))}";
+            prompt += $"\n\nDo not respond with one of these moves: {string.Join(", ", invalidMoves)}";
         }
 
         if (_moves.Count > 0)
@@ -142,21 +148,21 @@ Answer: <original file><original rank><destination file><destination rank>";
                 return;
             }
 
-            _invalidMovesPerStep.Add([]);
+            StepTelemetry current = new();
+            _telemetry.Add(current);
 
             for (; ; )
             {
                 var move = await InputMove(token);
 
-
-
                 if (MovePiece(move))
                 {
+                    current.TimeTaken = _stopwatch.Elapsed;
                     break;
                 }
 
                 ShowStopwatch($"invalid move: {move}");
-                _ = _invalidMovesPerStep[^1].Add(move);
+                _ = current.InvalidMoves.Add(move);
             }
 
             if (!MovePiece(_engine.GetBestMove()))
@@ -273,7 +279,7 @@ Answer: <original file><original rank><destination file><destination rank>";
     private async void BtnReset_Click(object sender, EventArgs e)
     {
         _moves.Clear();
-        _invalidMovesPerStep.Clear();
+        _telemetry.Clear();
         txtMoves.Clear();
         _engine.SetPosition();
         _ = await webView21.ExecuteScriptAsync("resetBoard();");
