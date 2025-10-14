@@ -258,7 +258,9 @@ Answer: <original file><original rank><destination file><destination rank>";
     private async void BtnReset_Click(object sender, EventArgs e)
     {
         _moves.Clear();
+        _invalidMovesPerStep.Clear();
         txtMoves.Clear();
+        _engine.SetPosition();
         _ = await webView21.ExecuteScriptAsync("resetBoard();");
     }
 }
