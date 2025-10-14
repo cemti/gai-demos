@@ -6,46 +6,50 @@
 .chess-board {
     border-spacing: 0;
     border-collapse: collapse;
-}
+    
+    .white-piece {
+        color: white;
+        text-shadow: 0 0 10px black;
+    }
+    
+    tr:last-child td {
+        border-bottom: 1px solid;
+    }
+    
+    th {
+        padding: .5em;
+        font-size: 24px;
+    }
 
-.chess-board th {
-    padding: .5em;
-}
+    th + th {
+        border-bottom: 1px solid black;
+    }
 
-.chess-board th + th {
-    border-bottom: 1px solid black;
-}
+    th:first-child, td:last-child {
+        border-right: 1px solid black;
+    }
 
-.chess-board th {
-    font-size: 24px
-}
+    th:empty {
+        border: none;
+    }
 
-.chess-board :is(th:first-child, td:last-child) {
-    border-right: 1px solid black;
-}
+    td {
+        width: 65px;
+        height: 65px;
+        text-align: center;
+        font-size: 64px;
+        line-height: 0;
+    }
 
-.chess-board tr:last-child td {
-    border-bottom: 1px solid;
-}
+    tr:nth-child(even) td:nth-child(even),
+    tr:nth-child(odd) td:nth-child(odd) {
+        background: #eee;
+    }
 
-.chess-board th:empty {
-    border: none;
-}
-
-.chess-board td {
-    width: 65px;
-    height: 65px;
-    text-align: center;
-    font-size: 64px;
-    line-height: 0;
-}
-
-.chess-board :is(tr:nth-child(even) td:nth-child(even), tr:nth-child(odd) td:nth-child(odd)) {
-    background: #eee;
-}
-
-.chess-board :is(tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd)) {
-    background: #aaa;
+    tr:nth-child(odd) td:nth-child(even),
+    tr:nth-child(even) td:nth-child(odd) {
+        background: #aaa;
+    }
 }
     </style>
 </head>
@@ -64,8 +68,8 @@ function resetBoard() {
     const initialPosition = {
         8: ['♜','♞','♝','♛','♚','♝','♞','♜'],
         7: Array(8).fill('♟'),
-        2: Array(8).fill('♙'),
-        1: ['♖','♘','♗','♕','♔','♗','♘','♖']
+        2: Array(8).fill('♟'),
+        1: ['♜','♞','♝','♛','♚','♝','♞','♜']
     };
 
     // Create header row (file letters)
@@ -94,9 +98,16 @@ function resetBoard() {
             td.id = file + rank;
 
             if (initialPosition[rank]) {
-                td.textContent = initialPosition[rank][f];
+                const piece = document.createElement('span');            
+                piece.textContent = initialPosition[rank][f];
+                
+                if (rank <= 2) {
+                    piece.className = 'white-piece';
+                }
+                
+                td.appendChild(piece);
             }
-
+            
             row.appendChild(td);
         }
 
@@ -113,13 +124,12 @@ function setPosition(fen) {
     }
     
     const symbols = {
-        'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
-        'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+        'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟'
     };
 
-    for (const f of files) {
-        for (const r of ranks) {
-            document.getElementById(f + r).textContent = '';
+    for (const file of files) {
+        for (const rank of ranks) {
+            window[file + rank].textContent = '';
         }
     }
 
@@ -134,12 +144,21 @@ function setPosition(fen) {
                 continue;
             }
             
-            if (symbols[ch]) {
+            const symbol = symbols[ch.toLowerCase()];
+            
+            if (symbol) {
                 const file = files[fileIndex];
-                const cell = document.getElementById(file + rank);
+                const cell = window[file + rank];
                 
                 if (cell) {
-                    cell.textContent = symbols[ch];
+                    const piece = document.createElement('span');            
+                    piece.textContent = symbol;
+                    
+                    if (ch === ch.toUpperCase()) {
+                        piece.className = 'white-piece';
+                    }
+                    
+                    cell.appendChild(piece);
                 }
                 
                 ++fileIndex;
