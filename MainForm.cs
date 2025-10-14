@@ -1,3 +1,4 @@
+using Microsoft.VisualBasic;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ Answer: <original file><original rank><destination file><destination rank>";
     public MainForm()
     {
         InitializeComponent();
-        modelComboBox.DataSource = new[] { "qwen2.5vl:32b", "gemma3:27b", "llama3.2-vision" };
+        modelComboBox.DataSource = new[] { "qwen2.5vl:32b-q8_0", "gemma3:27b-it-q8_0", "qwen2.5vl:32b", "gemma3:27b", "llama3.2-vision", "Manual" };
         webView21.Source = new(Path.GetFullPath("chessboard.html"));
     }
 
@@ -145,29 +146,11 @@ Answer: <original file><original rank><destination file><destination rank>";
 
             for (; ; )
             {
-                Dictionary<string, object> payload;
+                var move = await InputMove(token);
 
-                using (MemoryStream memoryStream = new())
-                {
-                    await webView21.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Jpeg, memoryStream);
-                    payload = GetPayload(memoryStream);
-                }
 
-                try
-                {
-                    move = (await CallLLMAsync(payload, token)).Replace("x", "");
-                }
-                catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
-                {
 
-                }
-
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                if (await MovePiece(move))
+                if (MovePiece(move))
                 {
                     break;
                 }
@@ -176,7 +159,7 @@ Answer: <original file><original rank><destination file><destination rank>";
                 _ = _invalidMovesPerStep[^1].Add(move);
             }
 
-            if (!await MovePiece(_engine.GetBestMove()))
+            if (!MovePiece(_engine.GetBestMove()))
             {
                 cbLoop.Checked = false;
             }
@@ -190,6 +173,38 @@ Answer: <original file><original rank><destination file><destination rank>";
         {
             btnStep.PerformClick();
         }
+    }
+
+    private async Task<string> InputMove(CancellationToken token)
+    {
+        string move = null;
+
+        if (modelComboBox.Text == "Manual")
+        {
+            move = Interaction.InputBox("Input move:", "Manual input");
+        }
+        else
+        {
+            Dictionary<string, object> payload;
+
+            using (MemoryStream memoryStream = new())
+            {
+                await webView21.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Jpeg, memoryStream);
+                payload = GetPayload(memoryStream);
+            }
+
+            try
+            {
+                move = await CallLLMAsync(payload, token);
+            }
+            catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
+            {
+
+            }
+        }
+
+        move = move.Replace("x", "");
+        return move;
     }
 
     private static async Task<string> CallLLMAsync(IReadOnlyDictionary<string, object> payload, CancellationToken cancellationToken)
@@ -229,7 +244,7 @@ Answer: <original file><original rank><destination file><destination rank>";
         return counts[0] > counts[1];
     }
 
-    private async Task<bool> MovePiece(string move)
+    private bool MovePiece(string move)
     {
         if (move is not null)
         {
@@ -247,7 +262,7 @@ Answer: <original file><original rank><destination file><destination rank>";
             bool isElimination = IsElimination(prevPosition, currentPosition);
             _moves.Add(new(move, isElimination));
 
-            _ = await webView21.ExecuteScriptAsync($"setPosition('{currentPosition}');");
+            _ = webView21.ExecuteScriptAsync($"setPosition('{currentPosition}');");
             txtMoves.Text = string.Join(", ", _moves.Index().Select(x => $"{x.Index + 1}. {x.Item}"));
             return true;
         }
