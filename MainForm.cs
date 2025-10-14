@@ -16,6 +16,11 @@ namespace WindowsErrorAnalyzer;
 
 public partial class MainForm : Form
 {
+    private readonly record struct ChessMove(string Move, bool IsElimination)
+    {
+        public override string ToString() => IsElimination ? Move[..2] + 'x' + Move[2..] : Move;
+    }
+
     private const string SystemPrompt = @"# Description
 You are playing as White in a chess game. Your task is to make a move that defeats Black.
 
@@ -38,7 +43,7 @@ Before answering, verify that the move is legal to perform on the chessboard.";
 
     private readonly Stopwatch _stopwatch = new();
     private readonly Stockfish.NET.Core.Stockfish _engine = new(StockfishPath);
-    private string[] _moves = [];
+    private List<ChessMove> _moves = [];
 
     public MainForm()
     {
@@ -191,14 +196,19 @@ Before answering, verify that the move is legal to perform on the chessboard.";
     [GeneratedRegex("([a-h][1-8]){2}")]
     private static partial Regex LanRegex();
 
+    private static bool IsElimination(string fenBefore, string fenAfter)
+    {
+        var counts = new[] { fenBefore, fenAfter }.Select(x => x.Split(' ')[0].Trim().Count(char.IsLetter)).ToArray();
+        return counts[0] > counts[1];
+    }
+
     private async Task<bool> MovePiece(string move)
     {
         if (move is not null)
         {
             var prevPosition = _engine.GetFenPosition();
 
-            string[] tempMoves = [.. _moves, move];
-            _engine.SetPosition(tempMoves);
+            _engine.SetPosition([.. _moves.Select(x => x.Move).Append(move)]);
 
             var currentPosition = _engine.GetFenPosition();
 
@@ -207,7 +217,9 @@ Before answering, verify that the move is legal to perform on the chessboard.";
                 return false;
             }
 
-            _moves = tempMoves;
+            bool isElimination = IsElimination(prevPosition, currentPosition);
+            _moves.Add(new(move, isElimination));
+
             _ = await webView21.ExecuteScriptAsync($"setPosition('{currentPosition}');");
             txtMoves.Text = string.Join(", ", _moves.Index().Select(x => $"{x.Index + 1}. {x.Item}"));
             return true;
