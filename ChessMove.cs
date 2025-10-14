@@ -1,4 +1,4 @@
-namespace WindowsErrorAnalyzer;
+namespace ChessAgent;
 
 internal readonly record struct ChessMove(string Move, bool IsElimination)
 {

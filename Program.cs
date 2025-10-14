@@ -2,7 +2,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace WindowsErrorAnalyzer
+namespace ChessAgent
 {
     static class Program
     {

@@ -1,5 +1,5 @@
 ﻿
-namespace WindowsErrorAnalyzer
+namespace ChessAgent
 {
     partial class MainForm
     {

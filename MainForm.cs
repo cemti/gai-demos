@@ -13,7 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace WindowsErrorAnalyzer;
+namespace ChessAgent;
 
 public partial class MainForm : Form
 {
