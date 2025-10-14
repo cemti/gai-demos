@@ -16,6 +16,24 @@ namespace WindowsErrorAnalyzer;
 
 public partial class MainForm : Form
 {
+    private const string SystemPrompt = @"# Description
+You are playing as White in a chess game. Your task is to make a move that defeats Black.
+
+# Task
+Do not repeat any previous moves. Your response must be a new move by White.
+
+Respond using Long Algebraic Notation (LAN) only - no words, no punctuation, no commentary.
+
+The attached image shows the current board state.
+
+Example: e2e4
+
+Answer: <original file><original rank><destination file><destination rank>
+
+# Obligations
+
+Before answering, verify that the move is legal to perform on the chessboard.";
+
     private const string StockfishPath = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
 
     private readonly Stopwatch _stopwatch = new();
@@ -56,29 +74,13 @@ public partial class MainForm : Form
 
     private Dictionary<string, object> GetPayload(MemoryStream ms, IEnumerable<string> invalidMoves)
     {
-        var prompt = @"# Description
-You are playing as White in a chess game. Your task is to make a move that defeats Black.
-
-# Task
-Do not repeat any previous moves. Your response must be a new move by White.
-
-Respond using Long Algebraic Notation (LAN) only - no words, no punctuation, no commentary.
-
-The attached image shows the current board state.
-
-Example: e2e4
-
-Answer: <original file><original rank><destination file><destination rank>
-
-# Obligations
-
-Before answering, verify that the move is legal to perform on the chessboard.";
-
+        var prompt = "";
+        /*
         if (_moves.Length > 0)
         {
             prompt += $"\n\nBe informed of this game history: [{string.Join(", ", _moves)}]";
         }
-
+        */
         if (invalidMoves.Any())
         {
             prompt += $"\n\nThe following moves are illegal (DO NOT USE THEM): {string.Join(", ", invalidMoves)}";
@@ -91,12 +93,13 @@ Before answering, verify that the move is legal to perform on the chessboard.";
         Dictionary<string, object> payload = new()
         {
             { "model", modelComboBox.Text },
+            { "system", SystemPrompt },
             { "prompt", prompt },
             { "images", images },
             { "options", new
             {
                 seed = rnd.Next(),
-                temperature = rnd.NextDouble()
+                temperature = 0
             } },
             { "stream", false }
         };
@@ -206,8 +209,7 @@ Before answering, verify that the move is legal to perform on the chessboard.";
 
             _moves = tempMoves;
             _ = await webView21.ExecuteScriptAsync($"setPosition('{currentPosition}');");
-
-            txtMoves.Text = string.Join(", ", _moves);
+            txtMoves.Text = string.Join(", ", _moves.Index().Select(x => $"{x.Index + 1}. {x.Item}"));
             return true;
         }
 
