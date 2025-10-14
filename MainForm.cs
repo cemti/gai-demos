@@ -17,17 +17,6 @@ namespace WindowsErrorAnalyzer;
 
 public partial class MainForm : Form
 {
-    private readonly record struct ChessMove(string Move, bool IsElimination)
-    {
-        public override string ToString() => IsElimination ? Move[..2] + 'x' + Move[2..] : Move;
-    }
-
-    private class StepTelemetry
-    {
-        public HashSet<string> InvalidMoves { get; } = [];
-        public TimeSpan TimeTaken { get; set; } = TimeSpan.Zero;
-    }
-
     private const string SystemPrompt = @"You are playing as White in a chess game.
 
 Your task is to make a move that defeats Black so that your king will not be in check.
