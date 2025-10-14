@@ -45,6 +45,8 @@ Before answering, verify that the move is legal to perform on the chessboard.";
     private readonly Stockfish.NET.Core.Stockfish _engine = new(StockfishPath);
     private List<ChessMove> _moves = [];
 
+    private CancellationTokenSource _cancellationTokenSource = new();
+
     public MainForm()
     {
         InitializeComponent();
@@ -65,7 +67,8 @@ Before answering, verify that the move is legal to perform on the chessboard.";
     private void SetBusy(bool busy)
     {
         UseWaitCursor = busy;
-        btnStep.Enabled = !busy;
+        btnReset.Enabled = !busy;
+        btnStep.Text = busy ? "Cancel" : "Step";
 
         if (busy)
         {
@@ -79,7 +82,7 @@ Before answering, verify that the move is legal to perform on the chessboard.";
 
     private Dictionary<string, object> GetPayload(MemoryStream ms, IEnumerable<string> invalidMoves)
     {
-        var prompt = "";
+        var prompt = "Make your move.";
         /*
         if (_moves.Length > 0)
         {
@@ -114,6 +117,20 @@ Before answering, verify that the move is legal to perform on the chessboard.";
 
     private async void BtnStep_Click(object sender, EventArgs e)
     {
+        var token = _cancellationTokenSource.Token;
+
+        if (btnStep.Text == "Cancel")
+        {
+            _cancellationTokenSource.Cancel();
+            return;
+        }
+
+        await Step(token);
+        _cancellationTokenSource = new();
+    }
+
+    private async Task Step(CancellationToken token)
+    {
         SetBusy(true);
 
         try
@@ -138,7 +155,19 @@ Before answering, verify that the move is legal to perform on the chessboard.";
                     payload = GetPayload(memoryStream, invalidMoves);
                 }
 
-                move = (await CallLLMAsync(payload)).Replace("x", "");
+                try
+                {
+                    move = (await CallLLMAsync(payload, token)).Replace("x", "");
+                }
+                catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
+                {
+
+                }
+
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
 
                 if (await MovePiece(move))
                 {
@@ -165,7 +194,7 @@ Before answering, verify that the move is legal to perform on the chessboard.";
         }
     }
 
-    private static async Task<string> CallLLMAsync(IReadOnlyDictionary<string, object> payload)
+    private static async Task<string> CallLLMAsync(IReadOnlyDictionary<string, object> payload, CancellationToken cancellationToken)
     {
         using HttpClient client = new()
         {
@@ -173,14 +202,14 @@ Before answering, verify that the move is legal to perform on the chessboard.";
         };
 
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("http://localhost:11434/api/generate", content);
+        var response = await client.PostAsync("http://localhost:11434/api/generate", content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
             return "LLM Error: " + response.ReasonPhrase;
         }
 
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
         using var doc = JsonDocument.Parse(json);
 
         var move = doc.RootElement.GetProperty("response").GetString();
