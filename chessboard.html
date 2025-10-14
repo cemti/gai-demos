@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <style>
+.chess-board {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.chess-board th {
+    padding: .5em;
+}
+
+.chess-board th + th {
+    border-bottom: 1px solid black;
+}
+
+.chess-board th {
+    font-size: 24px
+}
+
+.chess-board :is(th:first-child, td:last-child) {
+    border-right: 1px solid black;
+}
+
+.chess-board tr:last-child td {
+    border-bottom: 1px solid;
+}
+
+.chess-board th:empty {
+    border: none;
+}
+
+.chess-board td {
+    width: 65px;
+    height: 65px;
+    text-align: center;
+    font-size: 64px;
+    line-height: 0;
+}
+
+.chess-board :is(tr:nth-child(even) td:nth-child(even), tr:nth-child(odd) td:nth-child(odd)) {
+    background: #eee;
+}
+
+.chess-board :is(tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd)) {
+    background: #aaa;
+}
+    </style>
+</head>
+<body>
+    <table class='chess-board' id='board'></table>
+
+    <script>
+const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+const ranks = [8, 7, 6, 5, 4, 3, 2, 1];
+    
+function resetBoard() {
+    const board = window['board'];
+    board.textContent = '';
+
+    // Unicode chess pieces for initial setup
+    const initialPosition = {
+        8: ['♜','♞','♝','♛','♚','♝','♞','♜'],
+        7: Array(8).fill('♟'),
+        2: Array(8).fill('♙'),
+        1: ['♖','♘','♗','♕','♔','♗','♘','♖']
+    };
+
+    // Create header row (file letters)
+    const headerRow = document.createElement('tr');
+    
+    headerRow.appendChild(document.createElement('th'));
+    
+    for (const file of files) {
+        const th = document.createElement('th');
+        th.textContent = file;
+        headerRow.appendChild(th);
+    }
+    
+    board.appendChild(headerRow);
+
+    for (const rank of ranks) {
+        const row = document.createElement('tr');
+        
+        const th = document.createElement('th');
+        th.textContent = rank;
+        row.appendChild(th);
+
+        for (let f = 0; f < 8; ++f) {
+            const file = files[f];
+            const td = document.createElement('td');
+            td.id = file + rank;
+
+            if (initialPosition[rank]) {
+                td.textContent = initialPosition[rank][f];
+            }
+
+            row.appendChild(td);
+        }
+
+        board.appendChild(row);
+    }
+}
+    
+function setPosition(fen) {
+    const rows = fen.trim().split(/\s+/)[0].split('/');
+
+    if (rows.length !== 8) {
+        console.error(`Invalid FEN rank count: expected 8, got ${rows.length}`);
+        return;
+    }
+    
+    const symbols = {
+        'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+        'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+    };
+
+    for (const f of files) {
+        for (const r of ranks) {
+            document.getElementById(f + r).textContent = '';
+        }
+    }
+
+    for (let i = 0; i < 8; ++i) {
+        const rank = ranks[i];
+        const row = rows[i];
+        let fileIndex = 0;
+
+        for (const ch of row) {
+            if (/[1-8]/.test(ch)) {
+                fileIndex += parseInt(ch);
+                continue;
+            }
+            
+            if (symbols[ch]) {
+                const file = files[fileIndex];
+                const cell = document.getElementById(file + rank);
+                
+                if (cell) {
+                    cell.textContent = symbols[ch];
+                }
+                
+                ++fileIndex;
+                continue;
+            }
+
+            console.error(`Invalid FEN character '${ch}' in rank ${rank}`);
+            return;
+        }
+
+        if (fileIndex !== 8) {
+            console.error(`Invalid FEN row at rank ${rank}: expected 8 files, got ${fileIndex}`);
+            return;
+        }
+    }
+}
+
+resetBoard();
+    </script>
+</body>
+</html>
