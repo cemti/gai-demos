@@ -176,11 +176,10 @@ Before answering, verify that the move is legal to perform on the chessboard.";
         using var doc = JsonDocument.Parse(json);
 
         var move = doc.RootElement.GetProperty("response").GetString();
-        var match = LanRegex().Match(move);
 
-        if (match.Success)
+        if (LanRegex().Matches(move) is [.., { Value: var value }])
         {
-            return match.Value;
+            return value;
         }
 
         return move;
