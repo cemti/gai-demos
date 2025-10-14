@@ -21,29 +21,28 @@ public partial class MainForm : Form
         public override string ToString() => IsElimination ? Move[..2] + 'x' + Move[2..] : Move;
     }
 
-    private const string SystemPrompt = @"# Description
-You are playing as White in a chess game. Your task is to make a move that defeats Black.
+    private const string SystemPrompt = @"You are playing as White in a chess game.
 
-# Task
-Do not repeat any previous moves. Your response must be a new move by White.
-
-Respond using Long Algebraic Notation (LAN) only - no words, no punctuation, no commentary.
+Your task is to make a move that defeats Black so that your king will not be in check.
 
 The attached image shows the current board state.
 
+Respond using Long Algebraic Notation only, four characters.
+
 Example: e2e4
 
-Answer: <original file><original rank><destination file><destination rank>
-
-# Obligations
-
-Before answering, verify that the move is legal to perform on the chessboard.";
+Answer: <original file><original rank><destination file><destination rank>";
 
     private const string StockfishPath = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
 
     private readonly Stopwatch _stopwatch = new();
-    private readonly Stockfish.NET.Core.Stockfish _engine = new(StockfishPath);
-    private List<ChessMove> _moves = [];
+    private readonly Stockfish.NET.Core.Stockfish _engine = new(StockfishPath, 1)
+    {
+        SkillLevel = 0
+    };
+
+    private readonly List<ChessMove> _moves = [];
+    private readonly List<HashSet<string>> _invalidMovesPerStep = [];
 
     private CancellationTokenSource _cancellationTokenSource = new();
 
@@ -80,18 +79,18 @@ Before answering, verify that the move is legal to perform on the chessboard.";
         _stopwatch.Reset();
     }
 
-    private Dictionary<string, object> GetPayload(MemoryStream ms, IEnumerable<string> invalidMoves)
+    private Dictionary<string, object> GetPayload(MemoryStream ms)
     {
-        var prompt = "Make your move.";
-        /*
-        if (_moves.Length > 0)
+        var prompt = "Move.";
+
+        if (_invalidMovesPerStep[^1].Count > 0)
         {
-            prompt += $"\n\nBe informed of this game history: [{string.Join(", ", _moves)}]";
+            prompt += $"\n\nDo not respond with one of these moves: {string.Join(", ", _moves.Where((x, i) => (i & 1) == 0).Select(x => x.Move))}";
         }
-        */
-        if (invalidMoves.Any())
+
+        if (_moves.Count > 0)
         {
-            prompt += $"\n\nThe following moves are illegal (DO NOT USE THEM): {string.Join(", ", invalidMoves)}";
+            prompt += $"\n\nYour last moves are: {string.Join(", ", _moves.Where((x, i) => (i & 1) == 0).Select(x => x.Move))}";
         }
 
         string[] images = [Convert.ToBase64String(ms.ToArray())];
@@ -107,7 +106,7 @@ Before answering, verify that the move is legal to perform on the chessboard.";
             { "options", new
             {
                 seed = rnd.Next(),
-                temperature = 0
+                temperature = rnd.NextDouble()
             } },
             { "stream", false }
         };
@@ -142,8 +141,7 @@ Before answering, verify that the move is legal to perform on the chessboard.";
                 return;
             }
 
-            string move = null;
-            HashSet<string> invalidMoves = [];
+            _invalidMovesPerStep.Add([]);
 
             for (; ; )
             {
@@ -152,7 +150,7 @@ Before answering, verify that the move is legal to perform on the chessboard.";
                 using (MemoryStream memoryStream = new())
                 {
                     await webView21.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Jpeg, memoryStream);
-                    payload = GetPayload(memoryStream, invalidMoves);
+                    payload = GetPayload(memoryStream);
                 }
 
                 try
@@ -174,8 +172,8 @@ Before answering, verify that the move is legal to perform on the chessboard.";
                     break;
                 }
 
-                _ = invalidMoves.Add(move);
                 ShowStopwatch($"invalid move: {move}");
+                _ = _invalidMovesPerStep[^1].Add(move);
             }
 
             if (!await MovePiece(_engine.GetBestMove()))
@@ -259,7 +257,7 @@ Before answering, verify that the move is legal to perform on the chessboard.";
 
     private async void BtnReset_Click(object sender, EventArgs e)
     {
-        _moves = [];
+        _moves.Clear();
         txtMoves.Clear();
         _ = await webView21.ExecuteScriptAsync("resetBoard();");
     }
