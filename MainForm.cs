@@ -71,7 +71,6 @@ Answer: <original file><original rank><destination file><destination rank>";
 
     private void SetBusy(bool busy)
     {
-        UseWaitCursor = busy;
         btnReset.Enabled = !busy;
         btnStep.Text = busy ? "Cancel" : "Step";
     }
@@ -118,45 +117,47 @@ Answer: <original file><original rank><destination file><destination rank>";
 
     private async void BtnStep_Click(object sender, EventArgs e)
     {
-        var token = _cancellationTokenSource.Token;
-
         if (btnStep.Text == "Cancel")
         {
             _cancellationTokenSource.Cancel();
+
+            while (btnStep.Text == "Cancel")
+            {
+                await Task.Delay(10);
+            }
+
+            _cancellationTokenSource = new();
             return;
         }
 
-        await Step(token);
-        _cancellationTokenSource = new();
-    }
-
-    private async Task Step(CancellationToken token)
-    {
         SetBusy(true);
 
-        try
+        var token = _cancellationTokenSource.Token;
+
+        for (; ; )
         {
-            await RegisterMove(cbModelWhite.Text, token);
-            await RegisterMove(cbModelBlack.Text, token);
-        }
-        catch (InvalidOperationException ex)
-        {
-            _ = MessageBox.Show(ex.Message);
-            return;
-        }
-        catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
-        {
-            return;
-        }
-        finally
-        {
-            SetBusy(false);
+            try
+            {
+                await RegisterMove(cbModelWhite.Text, token);
+                await RegisterMove(cbModelBlack.Text, token);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _ = MessageBox.Show(ex.Message);
+                break;
+            }
+            catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
+            {
+                break;
+            }
+
+            if (!cbLoop.Checked)
+            {
+                break;
+            }
         }
 
-        if (cbLoop.Checked)
-        {
-            btnStep.PerformClick();
-        }
+        SetBusy(false);
     }
 
     private async Task RegisterMove(string model, CancellationToken token)
@@ -189,10 +190,8 @@ Answer: <original file><original rank><destination file><destination rank>";
 
     private async Task<StepTelemetry> MakeMove(string model, CancellationToken token)
     {
-        if (_engine.GetBestMoveTime(500) == null)
-        {
-            throw new InvalidOperationException("Game over.");
-        }
+        var bestMove = await Task.Run(() => _engine.GetBestMoveTime(500))
+                       ?? throw new InvalidOperationException("Game over.");
 
         HashSet<string> invalidMoves = [];
 
@@ -200,7 +199,11 @@ Answer: <original file><original rank><destination file><destination rank>";
         {
             var move = await InputMove(model, invalidMoves, token);
 
-            if (MovePiece(move, out var isElimination))
+            token.ThrowIfCancellationRequested();
+
+            var (isLegalMove, isElimination) = await MovePiece(move);
+
+            if (isLegalMove)
             {
                 return new(new(move, isElimination), invalidMoves, _stopwatch.Elapsed);
             }
@@ -215,10 +218,10 @@ Answer: <original file><original rank><destination file><destination rank>";
         switch (model)
         {
             case "Manual":
-                return Interaction.InputBox("Input move:", "Manual input");
+                return await Task.Run(() => Interaction.InputBox("Input move:", "Manual input"));
 
             case "Stockfish":
-                return _engine.GetBestMove();
+                return await Task.Run(_engine.GetBestMove);
 
             default:
                 Dictionary<string, object> payload;
@@ -270,11 +273,9 @@ Answer: <original file><original rank><destination file><destination rank>";
         return counts[0] > counts[1];
     }
 
-    private bool MovePiece(string move, out bool isElimination)
+    private async Task<(bool IsMoveLegal, bool IsElimination)> MovePiece(string move)
     {
-        isElimination = false;
-
-        if (move is not null)
+        var (isMoveLegal, isElimination, currentPosition) = await Task.Run(() =>
         {
             var prevPosition = _engine.GetFenPosition();
 
@@ -282,17 +283,17 @@ Answer: <original file><original rank><destination file><destination rank>";
 
             var currentPosition = _engine.GetFenPosition();
 
-            if (currentPosition == prevPosition)
-            {
-                return false;
-            }
+            return currentPosition == prevPosition
+                   ? (false, false, currentPosition)
+                   : (true, IsElimination(prevPosition, currentPosition), currentPosition);
+        });
 
-            isElimination = IsElimination(prevPosition, currentPosition);
-            _ = webView21.ExecuteScriptAsync($"setPosition('{currentPosition}');");
-            return true;
+        if (isMoveLegal)
+        {
+            _ = await webView21.ExecuteScriptAsync($"setPosition('{currentPosition}');");
         }
 
-        return false;
+        return (isMoveLegal, isElimination);
     }
 
     private async void BtnReset_Click(object sender, EventArgs e)
