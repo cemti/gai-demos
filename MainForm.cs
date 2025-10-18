@@ -205,7 +205,7 @@ Answer: <original file><original rank><destination file><destination rank>";
 
             if (isLegalMove)
             {
-                return new(new(move, isElimination), i + 1, invalidMoves, _stopwatch.Elapsed);
+                return new(model, new(move, isElimination), i + 1, invalidMoves, _stopwatch.Elapsed);
             }
 
             ShowStopwatch($"invalid move: {move}");
