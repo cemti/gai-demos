@@ -19,6 +19,7 @@ public partial class MainForm : Form
 {
     private const int MaxAttempts = 8;
 
+    private const string OllamaUrl = "http://localhost:11434/api/generate";
     private const string StockfishPath = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
 
     private static readonly string[] Models = ["qwen2.5vl:32b-q8_0", "gemma3:27b-it-q8_0", "qwen2.5vl:32b", "gemma3:27b", "llama3.2-vision", "Stockfish", "Manual"];
@@ -263,7 +264,7 @@ Answer: <original file><original rank><destination file><destination rank>";
         };
 
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("http://localhost:11434/api/generate", content, cancellationToken);
+        var response = await client.PostAsync(OllamaUrl, content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
