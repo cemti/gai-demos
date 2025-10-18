@@ -235,7 +235,7 @@ Answer: <original file><original rank><destination file><destination rank>";
 
                 using (MemoryStream memoryStream = new())
                 {
-                    await webView21.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Jpeg, memoryStream);
+                    await webView21.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, memoryStream);
                     payload = GetPayload(model, invalidMoves, memoryStream);
                 }
 
