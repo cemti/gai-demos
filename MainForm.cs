@@ -195,7 +195,7 @@ Answer: <original file><original rank><destination file><destination rank>";
 
         HashSet<string> invalidMoves = [];
 
-        for (; ; )
+        for (int i = 0; ; ++i)
         {
             var move = await InputMove(model, invalidMoves, token);
 
@@ -205,7 +205,7 @@ Answer: <original file><original rank><destination file><destination rank>";
 
             if (isLegalMove)
             {
-                return new(new(move, isElimination), invalidMoves, _stopwatch.Elapsed);
+                return new(new(move, isElimination), i + 1, invalidMoves, _stopwatch.Elapsed);
             }
 
             ShowStopwatch($"invalid move: {move}");
