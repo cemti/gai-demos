@@ -23,6 +23,11 @@ public partial class MainForm : Form
 
     private static readonly string[] Models = ["qwen2.5vl:32b-q8_0", "gemma3:27b-it-q8_0", "qwen2.5vl:32b", "gemma3:27b", "llama3.2-vision", "Stockfish", "Manual"];
 
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true
+    };
+
     private readonly Stopwatch _stopwatch = new();
 
     private readonly Stockfish.NET.Core.Stockfish _engine = new(StockfishPath, 1)
@@ -316,5 +321,20 @@ Answer: <original file><original rank><destination file><destination rank>";
         txtMoves.Clear();
         _engine.SetPosition();
         _ = await webView21.ExecuteScriptAsync("resetBoard();");
+    }
+
+    private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        using SaveFileDialog saveFileDialog = new()
+        {
+            Title = "Save telemetry",
+            Filter = "JSON file (*.json)|*.json"
+        };
+
+        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            using var stream = saveFileDialog.OpenFile();
+            JsonSerializer.Serialize(stream, _telemetry, SerializerOptions);
+        }
     }
 }

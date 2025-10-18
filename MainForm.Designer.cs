@@ -28,13 +28,17 @@ namespace ChessAgent
             cbModelBlack = new System.Windows.Forms.ComboBox();
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
+            menuStrip1 = new System.Windows.Forms.MenuStrip();
+            telemetryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
             statusStrip1.SuspendLayout();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // btnStep
             // 
-            btnStep.Location = new System.Drawing.Point(12, 635);
+            btnStep.Location = new System.Drawing.Point(12, 650);
             btnStep.Name = "btnStep";
             btnStep.Size = new System.Drawing.Size(75, 23);
             btnStep.TabIndex = 3;
@@ -43,7 +47,7 @@ namespace ChessAgent
             // 
             // txtMoves
             // 
-            txtMoves.Location = new System.Drawing.Point(12, 665);
+            txtMoves.Location = new System.Drawing.Point(12, 680);
             txtMoves.Multiline = true;
             txtMoves.Name = "txtMoves";
             txtMoves.ReadOnly = true;
@@ -55,7 +59,7 @@ namespace ChessAgent
             // 
             cbModelWhite.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             cbModelWhite.FormattingEnabled = true;
-            cbModelWhite.Location = new System.Drawing.Point(140, 635);
+            cbModelWhite.Location = new System.Drawing.Point(140, 650);
             cbModelWhite.Name = "cbModelWhite";
             cbModelWhite.Size = new System.Drawing.Size(121, 23);
             cbModelWhite.TabIndex = 8;
@@ -65,7 +69,8 @@ namespace ChessAgent
             webView21.AllowExternalDrop = true;
             webView21.CreationProperties = null;
             webView21.DefaultBackgroundColor = System.Drawing.Color.White;
-            webView21.Location = new System.Drawing.Point(12, 12);
+            webView21.Enabled = false;
+            webView21.Location = new System.Drawing.Point(12, 27);
             webView21.Name = "webView21";
             webView21.Size = new System.Drawing.Size(609, 617);
             webView21.TabIndex = 10;
@@ -73,7 +78,7 @@ namespace ChessAgent
             // 
             // btnReset
             // 
-            btnReset.Location = new System.Drawing.Point(546, 636);
+            btnReset.Location = new System.Drawing.Point(546, 651);
             btnReset.Name = "btnReset";
             btnReset.Size = new System.Drawing.Size(75, 23);
             btnReset.TabIndex = 11;
@@ -84,7 +89,7 @@ namespace ChessAgent
             // cbLoop
             // 
             cbLoop.AutoSize = true;
-            cbLoop.Location = new System.Drawing.Point(487, 639);
+            cbLoop.Location = new System.Drawing.Point(487, 654);
             cbLoop.Name = "cbLoop";
             cbLoop.Size = new System.Drawing.Size(53, 19);
             cbLoop.TabIndex = 12;
@@ -94,9 +99,10 @@ namespace ChessAgent
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { timeElapsedLabel });
-            statusStrip1.Location = new System.Drawing.Point(0, 767);
+            statusStrip1.Location = new System.Drawing.Point(0, 782);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new System.Drawing.Size(633, 22);
+            statusStrip1.SizingGrip = false;
             statusStrip1.TabIndex = 13;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -109,7 +115,7 @@ namespace ChessAgent
             // 
             cbModelBlack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             cbModelBlack.FormattingEnabled = true;
-            cbModelBlack.Location = new System.Drawing.Point(311, 635);
+            cbModelBlack.Location = new System.Drawing.Point(311, 650);
             cbModelBlack.Name = "cbModelBlack";
             cbModelBlack.Size = new System.Drawing.Size(121, 23);
             cbModelBlack.TabIndex = 8;
@@ -117,7 +123,7 @@ namespace ChessAgent
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(93, 640);
+            label1.Location = new System.Drawing.Point(93, 655);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(41, 15);
             label1.TabIndex = 14;
@@ -126,15 +132,39 @@ namespace ChessAgent
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(267, 640);
+            label2.Location = new System.Drawing.Point(267, 655);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(38, 15);
             label2.TabIndex = 14;
             label2.Text = "Black:";
             // 
+            // menuStrip1
+            // 
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { telemetryToolStripMenuItem });
+            menuStrip1.Location = new System.Drawing.Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new System.Drawing.Size(633, 24);
+            menuStrip1.TabIndex = 15;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // telemetryToolStripMenuItem
+            // 
+            telemetryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { saveToolStripMenuItem });
+            telemetryToolStripMenuItem.Name = "telemetryToolStripMenuItem";
+            telemetryToolStripMenuItem.Size = new System.Drawing.Size(71, 20);
+            telemetryToolStripMenuItem.Text = "Telemetry";
+            // 
+            // saveToolStripMenuItem
+            // 
+            saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            saveToolStripMenuItem.Text = "Save";
+            saveToolStripMenuItem.Click += SaveToolStripMenuItem_Click;
+            // 
             // MainForm
             // 
-            ClientSize = new System.Drawing.Size(633, 789);
+            ClientSize = new System.Drawing.Size(633, 804);
+            Controls.Add(menuStrip1);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(statusStrip1);
@@ -146,11 +176,15 @@ namespace ChessAgent
             Controls.Add(btnStep);
             Controls.Add(txtMoves);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            MainMenuStrip = menuStrip1;
+            MaximizeBox = false;
             Name = "MainForm";
             Text = "Chess Agent";
             ((System.ComponentModel.ISupportInitialize)webView21).EndInit();
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -164,5 +198,8 @@ namespace ChessAgent
         private System.Windows.Forms.ComboBox cbModelBlack;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem telemetryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
     }
 }
