@@ -17,25 +17,6 @@ namespace ChessAgent;
 
 public partial class MainForm : Form
 {
-    private static string GenerateSystemPrompt(bool isWhite)
-    {
-        var player = isWhite ? "White" : "Black";
-        var opponent = isWhite ? "Black" : "White";
-        var exampleMove = isWhite ? "e2e4" : "e7e5";
-
-        return @$"You are playing as {player} in a chess game.
-
-Your task is to make a move that defeats {opponent} so that your king will not be in check.
-
-The attached image shows the current board state.
-
-Respond using Long Algebraic Notation only, four characters.
-
-Example: {exampleMove}
-
-Answer: <original file><original rank><destination file><destination rank>";
-    }
-
     private const int MaxAttempts = 8;
 
     private const string StockfishPath = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
@@ -77,34 +58,52 @@ Answer: <original file><original rank><destination file><destination rank>";
         btnStep.Text = busy ? "Cancel" : "Step";
     }
 
-    private Dictionary<string, object> GetPayload(string model, ICollection<string> invalidMoves, MemoryStream ms)
+    private string GenerateSystemPrompt(ICollection<string> invalidMoves)
     {
-        int isBlack = _telemetry.Count & 1;
-        var prompt = "Move.";
+        var isWhite = (_telemetry.Count & 1) == 0;
+        var player = isWhite ? "White" : "Black";
+        var opponent = isWhite ? "Black" : "White";
+        var exampleMove = isWhite ? "e2e4" : "e7e5";
+
+        var prompt = @$"You are playing as {player} in a chess game.
+
+Your task is to make a move that defeats {opponent} so that your king will not be in check.
+
+The attached image shows the current board state.
+
+Respond using Long Algebraic Notation only, four characters.
+
+Example: {exampleMove}
+
+Answer: <original file><original rank><destination file><destination rank>";
+
+        if (_telemetry.Count > 0)
+        {
+            var query = from pair in _telemetry.Index()
+                        where (pair.Index & 1) == (isWhite ? 0 : 1)
+                        select pair.Item.Move;
+
+            prompt += $"\n\nYour last moves are: {string.Join(", ", query)}";
+        }
 
         if (invalidMoves.Count > 0)
         {
             prompt += $"\n\nDo not respond with one of these moves: {string.Join(", ", invalidMoves)}";
         }
 
-        if (_telemetry.Count > 0)
-        {
-            var query = from pair in _telemetry.Index()
-                        where ((pair.Index & 1) ^ isBlack) == 0
-                        select pair.Item.Move;
+        return prompt;
+    }
 
-            prompt += $"\n\nYour last moves are: {string.Join(", ", query)}";
-        }
-
+    private Dictionary<string, object> GetPayload(string model, ICollection<string> invalidMoves, MemoryStream ms)
+    {
         string[] images = [Convert.ToBase64String(ms.ToArray())];
-
         Random rnd = new();
 
-        Dictionary<string, object> payload = new()
+        return new()
         {
             { "model", model },
-            { "system", GenerateSystemPrompt(isBlack == 0) },
-            { "prompt", prompt },
+            { "system", GenerateSystemPrompt(invalidMoves) },
+            { "prompt", "Move." },
             { "images", images },
             { "options", new
             {
@@ -113,8 +112,6 @@ Answer: <original file><original rank><destination file><destination rank>";
             } },
             { "stream", false }
         };
-
-        return payload;
     }
 
     private async void BtnStep_Click(object sender, EventArgs e)
