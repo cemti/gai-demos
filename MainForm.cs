@@ -17,27 +17,36 @@ namespace ChessAgent;
 
 public partial class MainForm : Form
 {
-    private const string SystemPrompt = @"You are playing as White in a chess game.
+    private static string GenerateSystemPrompt(bool isWhite)
+    {
+        var player = isWhite ? "White" : "Black";
+        var opponent = isWhite ? "Black" : "White";
+        var exampleMove = isWhite ? "e2e4" : "e7e5";
 
-Your task is to make a move that defeats Black so that your king will not be in check.
+        return @$"You are playing as {player} in a chess game.
+
+Your task is to make a move that defeats {opponent} so that your king will not be in check.
 
 The attached image shows the current board state.
 
 Respond using Long Algebraic Notation only, four characters.
 
-Example: e2e4
+Example: {exampleMove}
 
 Answer: <original file><original rank><destination file><destination rank>";
+    }
 
     private const string StockfishPath = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
 
+    private static readonly string[] Models = ["qwen2.5vl:32b-q8_0", "gemma3:27b-it-q8_0", "qwen2.5vl:32b", "gemma3:27b", "llama3.2-vision", "Stockfish", "Manual"];
+
     private readonly Stopwatch _stopwatch = new();
+
     private readonly Stockfish.NET.Core.Stockfish _engine = new(StockfishPath, 1)
     {
         SkillLevel = 0
     };
 
-    private readonly List<ChessMove> _moves = [];
     private readonly List<StepTelemetry> _telemetry = [];
 
     private CancellationTokenSource _cancellationTokenSource = new();
@@ -45,7 +54,8 @@ Answer: <original file><original rank><destination file><destination rank>";
     public MainForm()
     {
         InitializeComponent();
-        modelComboBox.DataSource = new[] { "qwen2.5vl:32b-q8_0", "gemma3:27b-it-q8_0", "qwen2.5vl:32b", "gemma3:27b", "llama3.2-vision", "Manual" };
+        cbModelWhite.DataSource = new BindingSource(Models, "");
+        cbModelBlack.DataSource = new BindingSource(Models, "");
         webView21.Source = new(Path.GetFullPath("chessboard.html"));
     }
 
@@ -64,29 +74,25 @@ Answer: <original file><original rank><destination file><destination rank>";
         UseWaitCursor = busy;
         btnReset.Enabled = !busy;
         btnStep.Text = busy ? "Cancel" : "Step";
-
-        if (busy)
-        {
-            _stopwatch.Start();
-            return;
-        }
-
-        ShowStopwatch();
-        _stopwatch.Reset();
     }
 
-    private Dictionary<string, object> GetPayload(MemoryStream ms)
+    private Dictionary<string, object> GetPayload(string model, ICollection<string> invalidMoves, MemoryStream ms)
     {
+        int isBlack = _telemetry.Count & 1;
         var prompt = "Move.";
 
-        if (_telemetry[^1].InvalidMoves is { Count: > 0 } invalidMoves)
+        if (invalidMoves.Count > 0)
         {
             prompt += $"\n\nDo not respond with one of these moves: {string.Join(", ", invalidMoves)}";
         }
 
-        if (_moves.Count > 0)
+        if (_telemetry.Count > 0)
         {
-            prompt += $"\n\nYour last moves are: {string.Join(", ", _moves.Where((x, i) => (i & 1) == 0).Select(x => x.Move))}";
+            var query = from pair in _telemetry.Index()
+                        where ((pair.Index & 1) ^ isBlack) == 0
+                        select pair.Item.Move;
+
+            prompt += $"\n\nYour last moves are: {string.Join(", ", query)}";
         }
 
         string[] images = [Convert.ToBase64String(ms.ToArray())];
@@ -95,8 +101,8 @@ Answer: <original file><original rank><destination file><destination rank>";
 
         Dictionary<string, object> payload = new()
         {
-            { "model", modelComboBox.Text },
-            { "system", SystemPrompt },
+            { "model", model },
+            { "system", GenerateSystemPrompt(isBlack == 0) },
             { "prompt", prompt },
             { "images", images },
             { "options", new
@@ -130,34 +136,17 @@ Answer: <original file><original rank><destination file><destination rank>";
 
         try
         {
-            if (_engine.GetBestMoveTime(500) == null)
-            {
-                _ = MessageBox.Show("Game over.");
-                cbLoop.Checked = false;
-                return;
-            }
-
-            StepTelemetry current = new();
-            _telemetry.Add(current);
-
-            for (; ; )
-            {
-                var move = await InputMove(token);
-
-                if (MovePiece(move))
-                {
-                    current.TimeTaken = _stopwatch.Elapsed;
-                    break;
-                }
-
-                ShowStopwatch($"invalid move: {move}");
-                _ = current.InvalidMoves.Add(move);
-            }
-
-            if (!MovePiece(_engine.GetBestMove()))
-            {
-                cbLoop.Checked = false;
-            }
+            await RegisterMove(cbModelWhite.Text, token);
+            await RegisterMove(cbModelBlack.Text, token);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _ = MessageBox.Show(ex.Message);
+            return;
+        }
+        catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
+        {
+            return;
         }
         finally
         {
@@ -170,36 +159,78 @@ Answer: <original file><original rank><destination file><destination rank>";
         }
     }
 
-    private async Task<string> InputMove(CancellationToken token)
+    private async Task RegisterMove(string model, CancellationToken token)
     {
-        string move = null;
+        StepTelemetry telemetry;
+        _stopwatch.Restart();
 
-        if (modelComboBox.Text == "Manual")
+        try
         {
-            move = Interaction.InputBox("Input move:", "Manual input");
+            telemetry = await MakeMove(model, token);
         }
-        else
+        finally
         {
-            Dictionary<string, object> payload;
-
-            using (MemoryStream memoryStream = new())
-            {
-                await webView21.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Jpeg, memoryStream);
-                payload = GetPayload(memoryStream);
-            }
-
-            try
-            {
-                move = await CallLLMAsync(payload, token);
-            }
-            catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
-            {
-
-            }
+            _stopwatch.Stop();
+            ShowStopwatch();
         }
 
-        move = move.Replace("x", "");
-        return move;
+        _telemetry.Add(telemetry);
+        var count = _telemetry.Count;
+
+        if (count > 1)
+        {
+            txtMoves.Text += ", ";
+        }
+
+        txtMoves.Text += $"{count}. {telemetry.Move}";
+        txtMoves.SelectionStart = int.MaxValue;
+        txtMoves.ScrollToCaret();
+    }
+
+    private async Task<StepTelemetry> MakeMove(string model, CancellationToken token)
+    {
+        if (_engine.GetBestMoveTime(500) == null)
+        {
+            throw new InvalidOperationException("Game over.");
+        }
+
+        HashSet<string> invalidMoves = [];
+
+        for (; ; )
+        {
+            var move = await InputMove(model, invalidMoves, token);
+
+            if (MovePiece(move, out var isElimination))
+            {
+                return new(new(move, isElimination), invalidMoves, _stopwatch.Elapsed);
+            }
+
+            ShowStopwatch($"invalid move: {move}");
+            _ = invalidMoves.Add(move);
+        }
+    }
+
+    private async Task<string> InputMove(string model, ICollection<string> invalidMoves, CancellationToken token)
+    {
+        switch (model)
+        {
+            case "Manual":
+                return Interaction.InputBox("Input move:", "Manual input");
+
+            case "Stockfish":
+                return _engine.GetBestMove();
+
+            default:
+                Dictionary<string, object> payload;
+
+                using (MemoryStream memoryStream = new())
+                {
+                    await webView21.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Jpeg, memoryStream);
+                    payload = GetPayload(model, invalidMoves, memoryStream);
+                }
+
+                return (await CallLLMAsync(payload, token)).Replace("x", "");
+        }
     }
 
     private static async Task<string> CallLLMAsync(IReadOnlyDictionary<string, object> payload, CancellationToken cancellationToken)
@@ -239,13 +270,15 @@ Answer: <original file><original rank><destination file><destination rank>";
         return counts[0] > counts[1];
     }
 
-    private bool MovePiece(string move)
+    private bool MovePiece(string move, out bool isElimination)
     {
+        isElimination = false;
+
         if (move is not null)
         {
             var prevPosition = _engine.GetFenPosition();
 
-            _engine.SetPosition([.. _moves.Select(x => x.Move).Append(move)]);
+            _engine.SetPosition([.. _telemetry.Select(x => x.Move.RawMove).Append(move)]);
 
             var currentPosition = _engine.GetFenPosition();
 
@@ -254,11 +287,8 @@ Answer: <original file><original rank><destination file><destination rank>";
                 return false;
             }
 
-            bool isElimination = IsElimination(prevPosition, currentPosition);
-            _moves.Add(new(move, isElimination));
-
+            isElimination = IsElimination(prevPosition, currentPosition);
             _ = webView21.ExecuteScriptAsync($"setPosition('{currentPosition}');");
-            txtMoves.Text = string.Join(", ", _moves.Index().Select(x => $"{x.Index + 1}. {x.Item}"));
             return true;
         }
 
@@ -267,7 +297,6 @@ Answer: <original file><original rank><destination file><destination rank>";
 
     private async void BtnReset_Click(object sender, EventArgs e)
     {
-        _moves.Clear();
         _telemetry.Clear();
         txtMoves.Clear();
         _engine.SetPosition();
