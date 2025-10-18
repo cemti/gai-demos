@@ -198,7 +198,17 @@ Answer: <original file><original rank><destination file><destination rank>";
 
             for (int i = 1; i <= MaxAttempts; ++i)
             {
-                var move = await InputMove(model, invalidMoves, token);
+                string move;
+
+                try
+                {
+                    move = await InputMove(model, invalidMoves, token);
+                }
+                catch (FormatException ex)
+                {
+                    ShowStopwatch(ex.Message);
+                    continue;
+                }
 
                 token.ThrowIfCancellationRequested();
 
@@ -252,7 +262,7 @@ Answer: <original file><original rank><destination file><destination rank>";
 
         if (!response.IsSuccessStatusCode)
         {
-            return "LLM Error: " + response.ReasonPhrase;
+            throw new FormatException($"LLM Error: {response.ReasonPhrase}");
         }
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
