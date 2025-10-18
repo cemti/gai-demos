@@ -38,6 +38,9 @@ public partial class MainForm : Form
 
     private readonly List<StepTelemetry> _telemetry = [];
 
+    private StepTelemetry[] _replayTelemetry;
+    private IEnumerator<StepTelemetry> _replayIterator;
+
     private CancellationTokenSource _cancellationTokenSource = new();
 
     public MainForm()
@@ -237,6 +240,19 @@ Answer: <original file><original rank><destination file><destination rank>";
     {
         switch (model)
         {
+            case "Manual" when _replayTelemetry is not null:
+                if (invalidMoves.Count > 0)
+                {
+                    throw new InvalidOperationException("Invalid move to replay.");
+                }
+
+                if (!_replayIterator.MoveNext())
+                {
+                    throw new InvalidOperationException("End of replay.");
+                }
+
+                return _replayIterator.Current.Move.RawMove;
+
             case "Manual":
                 return await Task.Run(() => Interaction.InputBox("Input move:", "Manual input"));
 
@@ -318,6 +334,11 @@ Answer: <original file><original rank><destination file><destination rank>";
 
     private async void BtnReset_Click(object sender, EventArgs e)
     {
+        if (_replayTelemetry is not null)
+        {
+            _replayIterator = _replayTelemetry.AsEnumerable().GetEnumerator();
+        }
+
         _telemetry.Clear();
         txtMoves.Clear();
         _engine.SetPosition();
@@ -328,7 +349,7 @@ Answer: <original file><original rank><destination file><destination rank>";
     {
         using SaveFileDialog saveFileDialog = new()
         {
-            Title = "Save telemetry",
+            Title = "Save telemetry data",
             Filter = "JSON file (*.json)|*.json"
         };
 
@@ -337,5 +358,37 @@ Answer: <original file><original rank><destination file><destination rank>";
             using var stream = saveFileDialog.OpenFile();
             JsonSerializer.Serialize(stream, _telemetry, SerializerOptions);
         }
+    }
+
+    private void LoadToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        using OpenFileDialog openFileDialog = new()
+        {
+            Title = "Replay telemetry",
+            Filter = "JSON file (*.json)|*.json"
+        };
+
+        if (openFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            using var stream = openFileDialog.OpenFile();
+
+            _replayTelemetry = JsonSerializer.Deserialize<StepTelemetry[]>(stream);
+            _replayIterator = _replayTelemetry.AsEnumerable().GetEnumerator();
+
+            cbModelWhite.Text = "Manual";
+            cbModelWhite.Enabled = false;
+
+            cbModelBlack.Text = "Manual";
+            cbModelBlack.Enabled = false;
+        }
+    }
+
+    private void UnloadToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        _replayTelemetry = null;
+        _replayIterator = null;
+
+        cbModelWhite.Enabled = true;
+        cbModelBlack.Enabled = true;
     }
 }

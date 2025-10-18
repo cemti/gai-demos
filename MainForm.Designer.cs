@@ -31,6 +31,9 @@ namespace ChessAgent
             menuStrip1 = new System.Windows.Forms.MenuStrip();
             telemetryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            replayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            unloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -149,7 +152,7 @@ namespace ChessAgent
             // 
             // telemetryToolStripMenuItem
             // 
-            telemetryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { saveToolStripMenuItem });
+            telemetryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { saveToolStripMenuItem, replayToolStripMenuItem });
             telemetryToolStripMenuItem.Name = "telemetryToolStripMenuItem";
             telemetryToolStripMenuItem.Size = new System.Drawing.Size(71, 20);
             telemetryToolStripMenuItem.Text = "Telemetry";
@@ -160,6 +163,27 @@ namespace ChessAgent
             saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += SaveToolStripMenuItem_Click;
+            // 
+            // replayToolStripMenuItem
+            // 
+            replayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { loadToolStripMenuItem, unloadToolStripMenuItem });
+            replayToolStripMenuItem.Name = "replayToolStripMenuItem";
+            replayToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            replayToolStripMenuItem.Text = "Replay";
+            // 
+            // loadToolStripMenuItem
+            // 
+            loadToolStripMenuItem.Name = "loadToolStripMenuItem";
+            loadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            loadToolStripMenuItem.Text = "Load";
+            loadToolStripMenuItem.Click += LoadToolStripMenuItem_Click;
+            // 
+            // unloadToolStripMenuItem
+            // 
+            unloadToolStripMenuItem.Name = "unloadToolStripMenuItem";
+            unloadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            unloadToolStripMenuItem.Text = "Unload";
+            unloadToolStripMenuItem.Click += UnloadToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -201,5 +225,8 @@ namespace ChessAgent
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem telemetryToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem replayToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem unloadToolStripMenuItem;
     }
 }
