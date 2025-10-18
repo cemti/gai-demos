@@ -12,6 +12,8 @@ namespace ChessAgent;
 
 partial class MainForm
 {
+    private const string NoUserInputMessage = "No input by user.";
+
     private const string StockfishPath = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
     private const int MaxAttempts = 8;
 
@@ -31,7 +33,11 @@ partial class MainForm
             }
             catch (InvalidOperationException ex)
             {
-                _ = MessageBox.Show(ex.Message);
+                if (ex.Message != NoUserInputMessage)
+                {
+                    _ = MessageBox.Show(ex.Message);
+                }
+
                 break;
             }
             catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
@@ -132,7 +138,14 @@ partial class MainForm
                 return _replayIterator.Current.Move.RawMove;
 
             case "Manual":
-                return await Task.Run(() => Interaction.InputBox("Input move:", "Manual input"));
+                var move = Interaction.InputBox("Input move:", "Manual input");
+
+                if (move == "")
+                {
+                    throw new InvalidOperationException(NoUserInputMessage);
+                }
+
+                return move;
 
             case "Stockfish":
                 return await Task.Run(_engine.GetBestMove);
