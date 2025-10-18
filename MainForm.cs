@@ -36,6 +36,8 @@ Example: {exampleMove}
 Answer: <original file><original rank><destination file><destination rank>";
     }
 
+    private const int MaxAttempts = 8;
+
     private const string StockfishPath = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
 
     private static readonly string[] Models = ["qwen2.5vl:32b-q8_0", "gemma3:27b-it-q8_0", "qwen2.5vl:32b", "gemma3:27b", "llama3.2-vision", "Stockfish", "Manual"];
@@ -190,26 +192,31 @@ Answer: <original file><original rank><destination file><destination rank>";
 
     private async Task<StepTelemetry> MakeMove(string model, CancellationToken token)
     {
-        var bestMove = await Task.Run(() => _engine.GetBestMoveTime(500))
-                       ?? throw new InvalidOperationException("Game over.");
-
-        HashSet<string> invalidMoves = [];
-
-        for (int i = 0; ; ++i)
+        for (; ; )
         {
-            var move = await InputMove(model, invalidMoves, token);
+            var bestMove = await Task.Run(() => _engine.GetBestMoveTime(500))
+                           ?? throw new InvalidOperationException("Game over.");
 
-            token.ThrowIfCancellationRequested();
+            HashSet<string> invalidMoves = [];
 
-            var (isLegalMove, isElimination) = await MovePiece(move);
-
-            if (isLegalMove)
+            for (int i = 1; i <= MaxAttempts; ++i)
             {
-                return new(model, new(move, isElimination), i + 1, invalidMoves, _stopwatch.Elapsed);
+                var move = await InputMove(model, invalidMoves, token);
+
+                token.ThrowIfCancellationRequested();
+
+                var (isLegalMove, isElimination) = await MovePiece(move);
+
+                if (isLegalMove)
+                {
+                    return new(model, new(move, isElimination), i, invalidMoves, _stopwatch.Elapsed);
+                }
+
+                ShowStopwatch($"invalid move: {move}");
+                _ = invalidMoves.Add(move);
             }
 
-            ShowStopwatch($"invalid move: {move}");
-            _ = invalidMoves.Add(move);
+            model = "Stockfish";
         }
     }
 
