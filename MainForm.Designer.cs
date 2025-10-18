@@ -34,6 +34,9 @@ namespace ChessAgent
             replayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             unloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            promptingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            recallPastMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            recallIllegalMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -143,7 +146,7 @@ namespace ChessAgent
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { telemetryToolStripMenuItem });
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { telemetryToolStripMenuItem, promptingToolStripMenuItem });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new System.Drawing.Size(633, 24);
@@ -160,7 +163,7 @@ namespace ChessAgent
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            saveToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += SaveToolStripMenuItem_Click;
             // 
@@ -168,22 +171,47 @@ namespace ChessAgent
             // 
             replayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { loadToolStripMenuItem, unloadToolStripMenuItem });
             replayToolStripMenuItem.Name = "replayToolStripMenuItem";
-            replayToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            replayToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
             replayToolStripMenuItem.Text = "Replay";
             // 
             // loadToolStripMenuItem
             // 
             loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-            loadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            loadToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             loadToolStripMenuItem.Text = "Load";
             loadToolStripMenuItem.Click += LoadToolStripMenuItem_Click;
             // 
             // unloadToolStripMenuItem
             // 
             unloadToolStripMenuItem.Name = "unloadToolStripMenuItem";
-            unloadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            unloadToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             unloadToolStripMenuItem.Text = "Unload";
             unloadToolStripMenuItem.Click += UnloadToolStripMenuItem_Click;
+            // 
+            // promptingToolStripMenuItem
+            // 
+            promptingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { recallPastMovesToolStripMenuItem, recallIllegalMovesToolStripMenuItem });
+            promptingToolStripMenuItem.Name = "promptingToolStripMenuItem";
+            promptingToolStripMenuItem.Size = new System.Drawing.Size(76, 20);
+            promptingToolStripMenuItem.Text = "Prompting";
+            // 
+            // recallPastMovesToolStripMenuItem
+            // 
+            recallPastMovesToolStripMenuItem.Checked = true;
+            recallPastMovesToolStripMenuItem.CheckOnClick = true;
+            recallPastMovesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            recallPastMovesToolStripMenuItem.Name = "recallPastMovesToolStripMenuItem";
+            recallPastMovesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            recallPastMovesToolStripMenuItem.Text = "Recall past moves";
+            // 
+            // recallIllegalMovesToolStripMenuItem
+            // 
+            recallIllegalMovesToolStripMenuItem.Checked = true;
+            recallIllegalMovesToolStripMenuItem.CheckOnClick = true;
+            recallIllegalMovesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            recallIllegalMovesToolStripMenuItem.Name = "recallIllegalMovesToolStripMenuItem";
+            recallIllegalMovesToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            recallIllegalMovesToolStripMenuItem.Text = "Recall illegal moves per step";
             // 
             // MainForm
             // 
@@ -228,5 +256,8 @@ namespace ChessAgent
         private System.Windows.Forms.ToolStripMenuItem replayToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem unloadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem promptingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recallPastMovesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recallIllegalMovesToolStripMenuItem;
     }
 }

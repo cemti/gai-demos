@@ -34,7 +34,7 @@ Example: {exampleMove}
 
 Answer: <original file><original rank><destination file><destination rank>";
 
-        if (_telemetry.Count > 0)
+        if (recallPastMovesToolStripMenuItem.Checked && _telemetry.Count > 0)
         {
             var query = from pair in _telemetry.Index()
                         where (pair.Index & 1) == (isWhite ? 0 : 1)
@@ -43,7 +43,7 @@ Answer: <original file><original rank><destination file><destination rank>";
             prompt += $"\n\nYour last moves are: {string.Join(", ", query)}";
         }
 
-        if (invalidMoves.Count > 0)
+        if (recallIllegalMovesToolStripMenuItem.Checked && invalidMoves.Count > 0)
         {
             prompt += $"\n\nDo not respond with one of these moves: {string.Join(", ", invalidMoves)}";
         }
