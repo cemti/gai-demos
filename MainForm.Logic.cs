@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualBasic;
 using Microsoft.Web.WebView2.Core;
+using Stockfish.NET.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +21,20 @@ partial class MainForm
     {
         SkillLevel = 0
     };
+
+    // https://lichess.org/page/accuracy#first-compute-win
+    private static double GetWinPercent(Evaluation evaluation)
+    {
+        static double GetValue(Evaluation evaluation) => evaluation switch
+        {
+            { Type: "mate", Value: > 0 } => 1000,
+            { Type: "mate", Value: < 0 } => -1000,
+            { Type: "mate" } => double.NegativeInfinity,
+            { Value: var value } => value
+        };
+
+        return 50 + 50 * (2 / (1 + Math.Exp(-0.00368208 * GetValue(evaluation))) - 1);
+    }
 
     private async Task Step(CancellationToken token)
     {
@@ -56,6 +71,8 @@ partial class MainForm
         StepTelemetry telemetry;
         _stopwatch.Restart();
 
+        bool isWhite = (_telemetry.Count & 1) == 0;
+
         try
         {
             telemetry = await MakeMove(model, token);
@@ -63,8 +80,18 @@ partial class MainForm
         finally
         {
             _stopwatch.Stop();
-            ShowStopwatch();
         }
+
+        var evaluation = await Task.Run(() => _engine.GetEvaluation(100));
+
+        // GetEvaluation inverts for Black
+        if (isWhite)
+        {
+            evaluation.Value = -evaluation.Value;
+        }
+
+        var winPercent = 100 - GetWinPercent(evaluation);
+        ShowStopwatch($"{winPercent:0.##}% win rate for {(isWhite ? "White" : "Black")}");
 
         _telemetry.Add(telemetry);
         var count = _telemetry.Count;
