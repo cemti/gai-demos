@@ -22,8 +22,6 @@ public partial class MainForm : Form
 
     private CancellationTokenSource _cancellationTokenSource = new();
 
-    private bool IsWhiteTurn => (_telemetry.Count & 1) == 0;
-
     public MainForm()
     {
         InitializeComponent();

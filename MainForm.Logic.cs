@@ -68,34 +68,20 @@ partial class MainForm
 
     private async Task RegisterMove(Color color, CancellationToken token)
     {
-        bool isWhite = color == Color.White;
-        var cbModel = isWhite ? cbModelWhite : cbModelBlack;
-
-        if (_replayTelemetry is not null)
-        {
-            if (!_replayIterator.MoveNext())
-            {
-                throw new InvalidOperationException("End of replay.");
-            }
-
-            cbModel.Text = _replayIterator.Current.Model;
-        }
-
-        var model = cbModel.Text;
-
         StepTelemetry telemetry;
         _stopwatch.Restart();
 
         try
         {
-            telemetry = await MakeMove(model, token);
+            telemetry = await MakeMove(color, token);
         }
         finally
         {
             _stopwatch.Stop();
         }
 
-        ShowStopwatch($"{telemetry.WinPercentage:0.##}% win rate for {(IsWhiteTurn ? "White" : "Black")}");
+        bool isWhite = color == Color.White;
+        ShowStopwatch($"{telemetry.WinPercentage:0.##}% win rate for {(isWhite ? "White" : "Black")}");
 
         _telemetry.Add(telemetry);
         var count = _telemetry.Count;
@@ -110,9 +96,22 @@ partial class MainForm
         txtMoves.ScrollToCaret();
     }
 
-    private async Task<StepTelemetry> MakeMove(string model, CancellationToken token)
+    private async Task<StepTelemetry> MakeMove(Color color, CancellationToken token)
     {
         var maxAttempts = int.Parse(attemptsToolStripMenuItem.Text);
+        var cbModel = color == Color.White ? cbModelWhite : cbModelBlack;
+
+        if (_replayTelemetry is not null)
+        {
+            if (!_replayIterator.MoveNext())
+            {
+                throw new InvalidOperationException("End of replay.");
+            }
+
+            cbModel.Text = _replayIterator.Current.Model;
+        }
+
+        var model = cbModel.Text;
 
         for (; ; )
         {
@@ -127,7 +126,7 @@ partial class MainForm
 
                 try
                 {
-                    move = await InputMove(model, invalidMoves, token);
+                    move = await InputMove(color, model, invalidMoves, token);
                 }
                 catch (FormatException ex)
                 {
@@ -149,7 +148,7 @@ partial class MainForm
                 var evaluation = await Task.Run(() => _engine.GetEvaluation(100));
 
                 // GetEvaluation inverts for Black
-                if (IsWhiteTurn)
+                if (color == Color.White)
                 {
                     evaluation.Value = -evaluation.Value;
                 }
@@ -162,18 +161,20 @@ partial class MainForm
         }
     }
 
-    private async Task<string> InputMove(string model, ICollection<string> invalidMoves, CancellationToken token)
+    private async Task<string> InputMove(Color color, string model, ICollection<string> invalidMoves, CancellationToken token)
     {
+        if (_replayTelemetry is not null)
+        {
+            if (invalidMoves.Count > 0)
+            {
+                throw new InvalidOperationException("Invalid move to replay.");
+            }
+
+            return _replayIterator.Current.Move.RawMove;
+        }
+
         switch (model)
         {
-            case var _ when _replayTelemetry is not null:
-                if (invalidMoves.Count > 0)
-                {
-                    throw new InvalidOperationException("Invalid move to replay.");
-                }
-
-                return _replayIterator.Current.Move.RawMove;
-
             case "Manual":
                 var move = Interaction.InputBox("Input move:", "Manual input");
 
@@ -188,15 +189,15 @@ partial class MainForm
                 return await Task.Run(_engine.GetBestMove);
 
             default:
-                Dictionary<string, object> payload;
+                Dictionary<string, object> options;
 
                 using (MemoryStream memoryStream = new())
                 {
                     await webView21.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, memoryStream);
-                    payload = GetPayload(model, invalidMoves, memoryStream);
+                    options = GetModelOptions(color, model, invalidMoves, memoryStream);
                 }
 
-                return (await CallLLMAsync(payload, token)).Replace("x", "");
+                return (await CallLLMAsync(options, token)).Replace("x", "");
         }
     }
 

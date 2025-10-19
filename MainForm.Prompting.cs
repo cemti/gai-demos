@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Stockfish.NET.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,9 +16,9 @@ partial class MainForm
 {
     private const string OllamaUrl = "http://localhost:11434/api/generate";
 
-    private string GenerateSystemPrompt(ICollection<string> invalidMoves)
+    private string GenerateSystemPrompt(Color color, ICollection<string> invalidMoves)
     {
-        var isWhite = IsWhiteTurn;
+        var isWhite = color == Color.White;
         var player = isWhite ? "White" : "Black";
         var opponent = isWhite ? "Black" : "White";
         var exampleMove = isWhite ? "e2e4" : "e7e5";
@@ -51,7 +52,7 @@ Answer: <original file><original rank><destination file><destination rank>";
         return prompt;
     }
 
-    private Dictionary<string, object> GetPayload(string model, ICollection<string> invalidMoves, MemoryStream ms)
+    private Dictionary<string, object> GetModelOptions(Color color, string model, ICollection<string> invalidMoves, MemoryStream ms)
     {
         string[] images = [Convert.ToBase64String(ms.ToArray())];
         Random rnd = new();
@@ -59,7 +60,7 @@ Answer: <original file><original rank><destination file><destination rank>";
         return new()
         {
             { "model", model },
-            { "system", GenerateSystemPrompt(invalidMoves) },
+            { "system", GenerateSystemPrompt(color, invalidMoves) },
             { "prompt", "Move." },
             { "images", images },
             { "options", new
@@ -71,14 +72,14 @@ Answer: <original file><original rank><destination file><destination rank>";
         };
     }
 
-    private static async Task<string> CallLLMAsync(IReadOnlyDictionary<string, object> payload, CancellationToken cancellationToken)
+    private static async Task<string> CallLLMAsync(IReadOnlyDictionary<string, object> options, CancellationToken cancellationToken)
     {
         using HttpClient client = new()
         {
             Timeout = Timeout.InfiniteTimeSpan
         };
 
-        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        var content = new StringContent(JsonSerializer.Serialize(options), Encoding.UTF8, "application/json");
         var response = await client.PostAsync(OllamaUrl, content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
