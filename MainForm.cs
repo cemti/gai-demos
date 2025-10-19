@@ -11,7 +11,7 @@ namespace ChessAgent;
 
 public partial class MainForm : Form
 {
-    private static readonly string[] Models = ["qwen2.5vl:32b-q8_0", "gemma3:27b-it-q8_0", "qwen2.5vl:32b", "gemma3:27b", "llama3.2-vision", "Stockfish", "Manual"];
+    private static readonly string[] Models = ["qwen2.5vl:32b-q8_0", "gemma3:27b-it-q8_0", "Stockfish", "Manual"];
 
     private readonly List<StepTelemetry> _telemetry = [];
 
