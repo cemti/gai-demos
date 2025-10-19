@@ -42,8 +42,8 @@ partial class MainForm
         {
             try
             {
-                await RegisterMove(cbModelWhite.Text, token);
-                await RegisterMove(cbModelBlack.Text, token);
+                await RegisterMove(Color.White, token);
+                await RegisterMove(Color.Black, token);
             }
             catch (InvalidOperationException ex)
             {
@@ -66,12 +66,25 @@ partial class MainForm
         }
     }
 
-    private async Task RegisterMove(string model, CancellationToken token)
+    private async Task RegisterMove(Color color, CancellationToken token)
     {
+        bool isWhite = color == Color.White;
+        var cbModel = isWhite ? cbModelWhite : cbModelBlack;
+
+        if (_replayTelemetry is not null)
+        {
+            if (!_replayIterator.MoveNext())
+            {
+                throw new InvalidOperationException("End of replay.");
+            }
+
+            cbModel.Text = _replayIterator.Current.Model;
+        }
+
+        var model = cbModel.Text;
+
         StepTelemetry telemetry;
         _stopwatch.Restart();
-
-        bool isWhite = (_telemetry.Count & 1) == 0;
 
         try
         {
@@ -152,15 +165,10 @@ partial class MainForm
     {
         switch (model)
         {
-            case "Manual" when _replayTelemetry is not null:
+            case var _ when _replayTelemetry is not null:
                 if (invalidMoves.Count > 0)
                 {
                     throw new InvalidOperationException("Invalid move to replay.");
-                }
-
-                if (!_replayIterator.MoveNext())
-                {
-                    throw new InvalidOperationException("End of replay.");
                 }
 
                 return _replayIterator.Current.Move.RawMove;
