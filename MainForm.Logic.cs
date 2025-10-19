@@ -15,7 +15,6 @@ partial class MainForm
     private const string NoUserInputMessage = "No input by user.";
 
     private const string StockfishPath = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
-    private const int MaxAttempts = 8;
 
     private readonly Stockfish.NET.Core.Stockfish _engine = new(StockfishPath, 1)
     {
@@ -82,6 +81,8 @@ partial class MainForm
 
     private async Task<StepTelemetry> MakeMove(string model, CancellationToken token)
     {
+        var maxAttempts = int.Parse(attemptsToolStripMenuItem.Text);
+
         for (; ; )
         {
             var bestMove = await Task.Run(() => _engine.GetBestMoveTime(500))
@@ -89,7 +90,7 @@ partial class MainForm
 
             HashSet<string> invalidMoves = [];
 
-            for (int i = 1; i <= MaxAttempts; ++i)
+            for (int i = 1; i <= maxAttempts; ++i)
             {
                 string move;
 

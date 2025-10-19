@@ -58,4 +58,14 @@ partial class MainForm
         cbModelWhite.Enabled = true;
         cbModelBlack.Enabled = true;
     }
+
+    private void AttemptsToolStripMenuItem_TextChanged(object sender, EventArgs e)
+    {
+        var text = attemptsToolStripMenuItem.Text;
+
+        if (text != "" && !(int.TryParse(text, out var result) && result > 0))
+        {
+            attemptsToolStripMenuItem.Text = "8";
+        }
+    }
 }

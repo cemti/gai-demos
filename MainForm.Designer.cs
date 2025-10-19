@@ -37,6 +37,8 @@ namespace ChessAgent
             promptingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             recallPastMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             recallIllegalMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            maximumAttemptsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            attemptsToolStripMenuItem = new System.Windows.Forms.ToolStripTextBox();
             ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -190,7 +192,7 @@ namespace ChessAgent
             // 
             // promptingToolStripMenuItem
             // 
-            promptingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { recallPastMovesToolStripMenuItem, recallIllegalMovesToolStripMenuItem });
+            promptingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { recallPastMovesToolStripMenuItem, recallIllegalMovesToolStripMenuItem, maximumAttemptsToolStripMenuItem });
             promptingToolStripMenuItem.Name = "promptingToolStripMenuItem";
             promptingToolStripMenuItem.Size = new System.Drawing.Size(76, 20);
             promptingToolStripMenuItem.Text = "Prompting";
@@ -201,7 +203,7 @@ namespace ChessAgent
             recallPastMovesToolStripMenuItem.CheckOnClick = true;
             recallPastMovesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             recallPastMovesToolStripMenuItem.Name = "recallPastMovesToolStripMenuItem";
-            recallPastMovesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            recallPastMovesToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
             recallPastMovesToolStripMenuItem.Text = "Recall past moves";
             // 
             // recallIllegalMovesToolStripMenuItem
@@ -212,6 +214,20 @@ namespace ChessAgent
             recallIllegalMovesToolStripMenuItem.Name = "recallIllegalMovesToolStripMenuItem";
             recallIllegalMovesToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
             recallIllegalMovesToolStripMenuItem.Text = "Recall illegal moves per step";
+            // 
+            // maximumAttemptsToolStripMenuItem
+            // 
+            maximumAttemptsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { attemptsToolStripMenuItem });
+            maximumAttemptsToolStripMenuItem.Name = "maximumAttemptsToolStripMenuItem";
+            maximumAttemptsToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            maximumAttemptsToolStripMenuItem.Text = "Maximum attempts";
+            // 
+            // attemptsToolStripMenuItem
+            // 
+            attemptsToolStripMenuItem.Name = "attemptsToolStripMenuItem";
+            attemptsToolStripMenuItem.Size = new System.Drawing.Size(180, 23);
+            attemptsToolStripMenuItem.Text = "8";
+            attemptsToolStripMenuItem.TextChanged += AttemptsToolStripMenuItem_TextChanged;
             // 
             // MainForm
             // 
@@ -259,5 +275,7 @@ namespace ChessAgent
         private System.Windows.Forms.ToolStripMenuItem promptingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recallPastMovesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recallIllegalMovesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem maximumAttemptsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox attemptsToolStripMenuItem;
     }
 }
