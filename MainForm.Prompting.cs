@@ -17,7 +17,7 @@ partial class MainForm
 
     private string GenerateSystemPrompt(ICollection<string> invalidMoves)
     {
-        var isWhite = (_telemetry.Count & 1) == 0;
+        var isWhite = IsWhiteTurn;
         var player = isWhite ? "White" : "Black";
         var opponent = isWhite ? "Black" : "White";
         var exampleMove = isWhite ? "e2e4" : "e7e5";

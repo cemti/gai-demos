@@ -95,16 +95,7 @@ partial class MainForm
             _stopwatch.Stop();
         }
 
-        var evaluation = await Task.Run(() => _engine.GetEvaluation(100));
-
-        // GetEvaluation inverts for Black
-        if (isWhite)
-        {
-            evaluation.Value = -evaluation.Value;
-        }
-
-        var winPercent = 100 - GetWinPercent(evaluation);
-        ShowStopwatch($"{winPercent:0.##}% win rate for {(isWhite ? "White" : "Black")}");
+        ShowStopwatch($"{telemetry.WinPercentage:0.##}% win rate for {(IsWhiteTurn ? "White" : "Black")}");
 
         _telemetry.Add(telemetry);
         var count = _telemetry.Count;
@@ -148,13 +139,23 @@ partial class MainForm
 
                 var (isLegalMove, isElimination) = await MovePiece(move);
 
-                if (isLegalMove)
+                if (!isLegalMove)
                 {
-                    return new(model, new(move, isElimination), i, invalidMoves, _stopwatch.Elapsed);
+                    ShowStopwatch($"invalid move: {move}");
+                    _ = invalidMoves.Add(move);
+                    continue;
                 }
 
-                ShowStopwatch($"invalid move: {move}");
-                _ = invalidMoves.Add(move);
+                var evaluation = await Task.Run(() => _engine.GetEvaluation(100));
+
+                // GetEvaluation inverts for Black
+                if (IsWhiteTurn)
+                {
+                    evaluation.Value = -evaluation.Value;
+                }
+
+                var winPercent = 100 - GetWinPercent(evaluation);
+                return new(model, new(move, isElimination), i, invalidMoves, winPercent, _stopwatch.Elapsed);
             }
 
             model = "Stockfish";
