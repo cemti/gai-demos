@@ -44,6 +44,15 @@ Answer: <original file><original rank><destination file><destination rank>";
             prompt += $"\n\nYour last moves are: {string.Join(", ", query)}";
         }
 
+        if (recallPastOpponentMovesToolStripMenuItem.Checked && _telemetry.Count > 0)
+        {
+            var query = from pair in _telemetry.Index()
+                        where (pair.Index & 1) == (isWhite ? 1 : 0)
+                        select pair.Item.Move;
+
+            prompt += $"\n\nYour opponent's last moves are: {string.Join(", ", query)}";
+        }
+
         if (recallIllegalMovesToolStripMenuItem.Checked && invalidMoves.Count > 0)
         {
             prompt += $"\n\nDo not respond with one of these moves: {string.Join(", ", invalidMoves)}";
