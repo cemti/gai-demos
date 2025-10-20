@@ -225,6 +225,14 @@ partial class MainForm
         if (isMoveLegal)
         {
             _ = await webView21.ExecuteScriptAsync($"setPosition('{currentPosition}');");
+
+            if (highlightMovesToolStripMenuItem.Checked)
+            {
+                _ = await webView21.ExecuteScriptAsync($@"
+highlightElement('{move[..2]}');
+highlightElement('{move[2..]}');
+");
+            }
         }
 
         return (isMoveLegal, isElimination);

@@ -37,9 +37,11 @@ namespace ChessAgent
             promptingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             recallPastMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             recallIllegalMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            recallPastOpponentMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             maximumAttemptsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             attemptsToolStripMenuItem = new System.Windows.Forms.ToolStripTextBox();
-            recallPastOpponentMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            gUIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            highlightMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -149,7 +151,7 @@ namespace ChessAgent
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { telemetryToolStripMenuItem, promptingToolStripMenuItem });
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { telemetryToolStripMenuItem, promptingToolStripMenuItem, gUIToolStripMenuItem });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new System.Drawing.Size(633, 24);
@@ -216,6 +218,13 @@ namespace ChessAgent
             recallIllegalMovesToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             recallIllegalMovesToolStripMenuItem.Text = "Recall illegal moves per step";
             // 
+            // recallPastOpponentMovesToolStripMenuItem
+            // 
+            recallPastOpponentMovesToolStripMenuItem.CheckOnClick = true;
+            recallPastOpponentMovesToolStripMenuItem.Name = "recallPastOpponentMovesToolStripMenuItem";
+            recallPastOpponentMovesToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
+            recallPastOpponentMovesToolStripMenuItem.Text = "Recall past opponent moves";
+            // 
             // maximumAttemptsToolStripMenuItem
             // 
             maximumAttemptsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { attemptsToolStripMenuItem });
@@ -230,12 +239,19 @@ namespace ChessAgent
             attemptsToolStripMenuItem.Text = "8";
             attemptsToolStripMenuItem.TextChanged += AttemptsToolStripMenuItem_TextChanged;
             // 
-            // recallPastOpponentMovesToolStripMenuItem
+            // gUIToolStripMenuItem
             // 
-            recallPastOpponentMovesToolStripMenuItem.CheckOnClick = true;
-            recallPastOpponentMovesToolStripMenuItem.Name = "recallPastOpponentMovesToolStripMenuItem";
-            recallPastOpponentMovesToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
-            recallPastOpponentMovesToolStripMenuItem.Text = "Recall past opponent moves";
+            gUIToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { highlightMovesToolStripMenuItem });
+            gUIToolStripMenuItem.Name = "gUIToolStripMenuItem";
+            gUIToolStripMenuItem.Size = new System.Drawing.Size(38, 20);
+            gUIToolStripMenuItem.Text = "GUI";
+            // 
+            // highlightMovesToolStripMenuItem
+            // 
+            highlightMovesToolStripMenuItem.CheckOnClick = true;
+            highlightMovesToolStripMenuItem.Name = "highlightMovesToolStripMenuItem";
+            highlightMovesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            highlightMovesToolStripMenuItem.Text = "Highlight moves";
             // 
             // MainForm
             // 
@@ -286,5 +302,7 @@ namespace ChessAgent
         private System.Windows.Forms.ToolStripMenuItem maximumAttemptsToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox attemptsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recallPastOpponentMovesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gUIToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem highlightMovesToolStripMenuItem;
     }
 }

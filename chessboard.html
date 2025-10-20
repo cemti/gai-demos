@@ -44,11 +44,13 @@
     tr:nth-child(even) td:nth-child(even),
     tr:nth-child(odd) td:nth-child(odd) {
         background: #eee;
+        --highlighted-color: yellow;
     }
 
     tr:nth-child(odd) td:nth-child(even),
     tr:nth-child(even) td:nth-child(odd) {
         background: #aaa;
+        --highlighted-color: gold;
     }
 }
     </style>
@@ -133,6 +135,7 @@ function setPosition(fen) {
     for (const file of files) {
         for (const rank of ranks) {
             window[file + rank].textContent = '';
+            window[file + rank].removeAttribute('style');
         }
     }
 
@@ -173,6 +176,10 @@ function setPosition(fen) {
     }
     
     currentFen = newFen;
+}
+
+function highlightElement(id) {
+    window[id].style.background = 'var(--highlighted-color)';
 }
 
 resetBoard();
