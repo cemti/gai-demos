@@ -73,6 +73,7 @@ public partial class MainForm : Form
             _replayIterator = _replayTelemetry.AsEnumerable().GetEnumerator();
         }
 
+        timeElapsedLabel.Text = "";
         _telemetry.Clear();
         txtMoves.Clear();
         _engine.SetPosition();
