@@ -1,0 +1,3 @@
+[submodule "Stockfish.NET"]
+	path = Stockfish.NET
+	url = https://github.com/cemti/Stockfish.NET

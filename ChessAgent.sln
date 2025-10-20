@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessAgent", "ChessAgent.csproj", "{BFD54157-63FE-A1C5-08C4-5940F6AB2FE1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessAgent", "ChessAgent\ChessAgent.csproj", "{BFD54157-63FE-A1C5-08C4-5940F6AB2FE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stockfish.NET", "..\Stockfish.NET\Stockfish.NET\Stockfish.NET.csproj", "{89F458E4-ACE6-D2F0-7757-EE745D15AE98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stockfish.NET", "Stockfish.NET\Stockfish.NET\Stockfish.NET.csproj", "{C83C2A10-C675-3EBF-7FB2-1229D683F91A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{BFD54157-63FE-A1C5-08C4-5940F6AB2FE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFD54157-63FE-A1C5-08C4-5940F6AB2FE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFD54157-63FE-A1C5-08C4-5940F6AB2FE1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{89F458E4-ACE6-D2F0-7757-EE745D15AE98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{89F458E4-ACE6-D2F0-7757-EE745D15AE98}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{89F458E4-ACE6-D2F0-7757-EE745D15AE98}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{89F458E4-ACE6-D2F0-7757-EE745D15AE98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C83C2A10-C675-3EBF-7FB2-1229D683F91A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C83C2A10-C675-3EBF-7FB2-1229D683F91A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C83C2A10-C675-3EBF-7FB2-1229D683F91A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C83C2A10-C675-3EBF-7FB2-1229D683F91A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Stockfish.NET\Stockfish.NET\Stockfish.NET.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="chessboard.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
