@@ -59,12 +59,12 @@
     <script>
 const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const ranks = [8, 7, 6, 5, 4, 3, 2, 1];
+let currentFen = '';
     
 function resetBoard() {
     const board = window['board'];
     board.textContent = '';
 
-    // Unicode chess pieces for initial setup
     const initialPosition = {
         8: ['♜','♞','♝','♛','♚','♝','♞','♜'],
         7: Array(8).fill('♟'),
@@ -72,9 +72,7 @@ function resetBoard() {
         1: ['♜','♞','♝','♛','♚','♝','♞','♜']
     };
 
-    // Create header row (file letters)
-    const headerRow = document.createElement('tr');
-    
+    const headerRow = document.createElement('tr');    
     headerRow.appendChild(document.createElement('th'));
     
     for (const file of files) {
@@ -113,14 +111,19 @@ function resetBoard() {
 
         board.appendChild(row);
     }
+    
+    currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 }
     
 function setPosition(fen) {
-    const rows = fen.trim().split(/\s+/)[0].split('/');
+    const previousFen = currentFen;
+    currentFen = '';
+    
+    const newFen = fen.trim().split(/\s+/)[0];
+    const rows = newFen.split('/');
 
     if (rows.length !== 8) {
-        console.error(`Invalid FEN rank count: expected 8, got ${rows.length}`);
-        return;
+        throw `Invalid FEN rank count: expected 8, got ${rows.length}`;
     }
     
     const symbols = {
@@ -146,34 +149,30 @@ function setPosition(fen) {
             
             const symbol = symbols[ch.toLowerCase()];
             
-            if (symbol) {
-                const file = files[fileIndex];
-                const cell = window[file + rank];
-                
-                if (cell) {
-                    const piece = document.createElement('span');            
-                    piece.textContent = symbol;
-                    
-                    if (ch === ch.toUpperCase()) {
-                        piece.className = 'white-piece';
-                    }
-                    
-                    cell.appendChild(piece);
-                }
-                
-                ++fileIndex;
-                continue;
+            if (!symbol) {
+                throw `Invalid FEN character '${ch}' in rank ${rank}`;
             }
-
-            console.error(`Invalid FEN character '${ch}' in rank ${rank}`);
-            return;
+            
+            const file = files[fileIndex];
+            const cell = window[file + rank];
+            
+            const piece = document.createElement('span');            
+            piece.textContent = symbol;
+            
+            if (ch === ch.toUpperCase()) {
+                piece.className = 'white-piece';
+            }
+            
+            cell.appendChild(piece);            
+            ++fileIndex;
         }
 
         if (fileIndex !== 8) {
-            console.error(`Invalid FEN row at rank ${rank}: expected 8 files, got ${fileIndex}`);
-            return;
+            throw `Invalid FEN row at rank ${rank}: expected 8 files, got ${fileIndex}`;
         }
     }
+    
+    currentFen = newFen;
 }
 
 resetBoard();
