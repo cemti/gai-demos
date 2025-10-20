@@ -43,6 +43,7 @@ public partial class MainForm : Form
     private void SetBusy(bool busy)
     {
         btnReset.Enabled = !busy;
+        replayToolStripMenuItem.Enabled = !busy;
         btnStep.Text = busy ? "Cancel" : "Step";
     }
 
