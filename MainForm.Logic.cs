@@ -80,8 +80,7 @@ partial class MainForm
             _stopwatch.Stop();
         }
 
-        bool isWhite = color == Color.White;
-        ShowStopwatch($"{telemetry.WinPercentage:0.##}% win rate for {(isWhite ? "White" : "Black")}");
+        ShowStopwatch($"{telemetry.WinPercentage:0.##}% win rate for {color}");
 
         _telemetry.Add(telemetry);
         var count = _telemetry.Count;

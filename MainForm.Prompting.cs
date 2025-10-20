@@ -16,14 +16,13 @@ partial class MainForm
 {
     private const string OllamaUrl = "http://localhost:11434/api/generate";
 
-    private string GenerateSystemPrompt(Color color, ICollection<string> invalidMoves)
+    private string GenerateSystemPrompt(Color playerColor, ICollection<string> invalidMoves)
     {
-        var isWhite = color == Color.White;
-        var player = isWhite ? "White" : "Black";
+        var isWhite = playerColor == Color.White;
         var opponent = isWhite ? "Black" : "White";
         var exampleMove = isWhite ? "e2e4" : "e7e5";
 
-        var prompt = @$"You are playing as {player} in a chess game.
+        var prompt = @$"You are playing as {playerColor} in a chess game.
 
 Your task is to make a move that defeats {opponent} so that your king will not be in check.
 
