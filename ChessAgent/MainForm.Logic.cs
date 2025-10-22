@@ -33,7 +33,7 @@ partial class MainForm
             { Value: var value } => value
         };
 
-        return 50 + 50 * (2 / (1 + Math.Exp(-0.00368208 * GetValue(evaluation))) - 1);
+        return 100 / (1 + Math.Exp(-0.00368208 * GetValue(evaluation)));
     }
 
     private async Task Step(CancellationToken token)
