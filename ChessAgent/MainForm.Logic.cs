@@ -42,8 +42,13 @@ partial class MainForm
         {
             try
             {
-                await RegisterMove(Color.White, token);
-                await RegisterMove(Color.Black, token);
+                var color = (_telemetry.Count & 1) switch
+                {
+                    0 => Color.White,
+                    _ => Color.Black
+                };
+
+                await RegisterMove(color, token);
             }
             catch (InvalidOperationException ex)
             {
