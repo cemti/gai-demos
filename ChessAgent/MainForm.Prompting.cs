@@ -14,7 +14,7 @@ namespace ChessAgent;
 
 partial class MainForm
 {
-    private const string OllamaUrl = "http://localhost:11434/api/generate";
+    private string GetGenerateUrl() => $"{ollamaEndpointTextBoxToolStripMenuItem.Text}/api/generate";
 
     private string GenerateSystemPrompt(Color playerColor, ICollection<string> invalidMoves)
     {
@@ -80,7 +80,7 @@ Answer: <original file><original rank><destination file><destination rank>";
         };
     }
 
-    private static async Task<string> CallLLMAsync(IReadOnlyDictionary<string, object> options, CancellationToken cancellationToken)
+    private async Task<string> CallLLMAsync(IReadOnlyDictionary<string, object> options, CancellationToken cancellationToken)
     {
         using HttpClient client = new()
         {
@@ -88,7 +88,16 @@ Answer: <original file><original rank><destination file><destination rank>";
         };
 
         var content = new StringContent(JsonSerializer.Serialize(options), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync(OllamaUrl, content, cancellationToken);
+        HttpResponseMessage response;
+
+        try
+        {
+            response = await client.PostAsync(GetGenerateUrl(), content, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Ollama POST error: {ex.Message}", ex);
+        }
 
         if (!response.IsSuccessStatusCode)
         {

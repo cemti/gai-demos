@@ -13,6 +13,8 @@ public partial class MainForm : Form
 {
     private static readonly string[] Models = ["qwen2.5vl:32b-q8_0", "gemma3:27b-it-q8_0", "Stockfish", "Manual"];
 
+    private Stockfish.NET.Core.Stockfish _engine;
+
     private readonly List<StepTelemetry> _telemetry = [];
 
     private StepTelemetry[] _replayTelemetry;
@@ -28,6 +30,34 @@ public partial class MainForm : Form
         cbModelWhite.DataSource = new BindingSource(Models, "");
         cbModelBlack.DataSource = new BindingSource(Models, "");
         webView21.Source = new(Path.GetFullPath("chessboard.html"));
+
+        stockfishPathTextBoxToolStripMenuItem.Text = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
+        ollamaEndpointTextBoxToolStripMenuItem.Text = "http://localhost:11434";
+    }
+
+    private void EnsureStockfish()
+    {
+        if (_engine is not null)
+        {
+            return;
+        }
+
+        var path = stockfishPathTextBoxToolStripMenuItem.Text;
+
+        if (!File.Exists(path))
+        {
+            throw new InvalidOperationException("Invalid path for the Stockfish executable.");
+        }
+
+        UseWaitCursor = true;
+        stockfishPathTextBoxToolStripMenuItem.Enabled = false;
+
+        _engine = new(path, 1)
+        {
+            SkillLevel = 0
+        };
+
+        UseWaitCursor = false;
     }
 
     private void ShowStopwatch(string input = null)
@@ -62,6 +92,8 @@ public partial class MainForm : Form
             return;
         }
 
+        EnsureStockfish();
+
         SetBusy(true);
         await Step(_cancellationTokenSource.Token);
         SetBusy(false);
@@ -77,7 +109,13 @@ public partial class MainForm : Form
         timeElapsedLabel.Text = "";
         _telemetry.Clear();
         txtMoves.Clear();
-        _engine.SetPosition();
         _ = await webView21.ExecuteScriptAsync("resetBoard();");
+
+        if (_engine is not null)
+        {
+            stockfishPathTextBoxToolStripMenuItem.Enabled = true;
+            _engine.Dispose();
+            _engine = null;
+        }
     }
 }

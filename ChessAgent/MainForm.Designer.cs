@@ -42,6 +42,11 @@ namespace ChessAgent
             attemptsToolStripMenuItem = new System.Windows.Forms.ToolStripTextBox();
             gUIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             highlightMovesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            locationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            stockfishPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            stockfishPathTextBoxToolStripMenuItem = new System.Windows.Forms.ToolStripTextBox();
+            ollamaEndpointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            ollamaEndpointTextBoxToolStripMenuItem = new System.Windows.Forms.ToolStripTextBox();
             ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -151,7 +156,7 @@ namespace ChessAgent
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { telemetryToolStripMenuItem, promptingToolStripMenuItem, gUIToolStripMenuItem });
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { telemetryToolStripMenuItem, promptingToolStripMenuItem, gUIToolStripMenuItem, locationsToolStripMenuItem });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new System.Drawing.Size(633, 24);
@@ -250,8 +255,39 @@ namespace ChessAgent
             // 
             highlightMovesToolStripMenuItem.CheckOnClick = true;
             highlightMovesToolStripMenuItem.Name = "highlightMovesToolStripMenuItem";
-            highlightMovesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            highlightMovesToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
             highlightMovesToolStripMenuItem.Text = "Highlight moves";
+            // 
+            // locationsToolStripMenuItem
+            // 
+            locationsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { stockfishPathToolStripMenuItem, ollamaEndpointToolStripMenuItem });
+            locationsToolStripMenuItem.Name = "locationsToolStripMenuItem";
+            locationsToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
+            locationsToolStripMenuItem.Text = "Locations";
+            // 
+            // stockfishPathToolStripMenuItem
+            // 
+            stockfishPathToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { stockfishPathTextBoxToolStripMenuItem });
+            stockfishPathToolStripMenuItem.Name = "stockfishPathToolStripMenuItem";
+            stockfishPathToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            stockfishPathToolStripMenuItem.Text = "Stockfish path";
+            // 
+            // stockfishPathTextBoxToolStripMenuItem
+            // 
+            stockfishPathTextBoxToolStripMenuItem.Name = "stockfishPathTextBoxToolStripMenuItem";
+            stockfishPathTextBoxToolStripMenuItem.Size = new System.Drawing.Size(185, 23);
+            // 
+            // ollamaEndpointToolStripMenuItem
+            // 
+            ollamaEndpointToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { ollamaEndpointTextBoxToolStripMenuItem });
+            ollamaEndpointToolStripMenuItem.Name = "ollamaEndpointToolStripMenuItem";
+            ollamaEndpointToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            ollamaEndpointToolStripMenuItem.Text = "Ollama endpoint";
+            // 
+            // ollamaEndpointTextBoxToolStripMenuItem
+            // 
+            ollamaEndpointTextBoxToolStripMenuItem.Name = "ollamaEndpointTextBoxToolStripMenuItem";
+            ollamaEndpointTextBoxToolStripMenuItem.Size = new System.Drawing.Size(198, 23);
             // 
             // MainForm
             // 
@@ -304,5 +340,10 @@ namespace ChessAgent
         private System.Windows.Forms.ToolStripMenuItem recallPastOpponentMovesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gUIToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem highlightMovesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem locationsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem stockfishPathToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox stockfishPathTextBoxToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ollamaEndpointToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox ollamaEndpointTextBoxToolStripMenuItem;
     }
 }

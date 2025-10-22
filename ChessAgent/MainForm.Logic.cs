@@ -15,13 +15,6 @@ partial class MainForm
 {
     private const string NoUserInputMessage = "No input by user.";
 
-    private const string StockfishPath = @"D:\Stockfish\stockfish-windows-x86-64-bmi2.exe";
-
-    private readonly Stockfish.NET.Core.Stockfish _engine = new(StockfishPath, 1)
-    {
-        SkillLevel = 0
-    };
-
     // https://lichess.org/page/accuracy#first-compute-win
     private static double GetWinPercent(Evaluation evaluation)
     {
